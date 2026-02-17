@@ -569,7 +569,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                   _buildDrawerPillItem(
                     icon: Icons.chat_bubble_rounded, // Chat Icon from image
                     title: "Pro Admission",
-                    onTap: () => Get.toNamed('/proadmission'),
+                    onTap: () => Get.toNamed('/proAdmission'),
                   ),
                   _buildExpandableDrawerItem(
                     icon: Icons.apartment_rounded, // Hostel Icon from image

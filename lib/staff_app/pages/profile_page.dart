@@ -73,8 +73,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   // 1. Purple Header
                   Container(
-                    height: 60,
-                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 10,
+                      bottom: 25,
+                      left: 20,
+                      right: 20,
+                    ),
                     decoration: const BoxDecoration(
                       color: Color(0xFF7E49FF),
                       borderRadius: BorderRadius.only(
@@ -82,36 +86,30 @@ class _ProfilePageState extends State<ProfilePage> {
                         bottomRight: Radius.circular(30),
                       ),
                     ),
-                    child: SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Get.back(),
+                          icon: const Icon(
+                            Icons.account_box_outlined,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.person_outline,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              "profile",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        const Text(
+                          "Profile",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 100),
+                  Padding(padding: EdgeInsets.all(20)),
 
                   // 2. Profile Card (Overlapping)
                   Positioned(
@@ -291,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         Container(
-          height: 70,
+          height: 80,
           width: double.infinity,
           decoration: const BoxDecoration(
             color: Color(0xFF7E49FF),

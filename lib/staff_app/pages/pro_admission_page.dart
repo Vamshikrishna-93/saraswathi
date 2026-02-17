@@ -280,6 +280,21 @@ class ProAdmissionPage extends StatelessWidget {
               final target = data['target'] as int;
               final remaining = (target - achieved).clamp(0, 500);
 
+              final stackItems = <BarChartRodStackItem>[
+                if (achieved > 0)
+                  BarChartRodStackItem(
+                    0,
+                    achieved.toDouble(),
+                    const Color(0xFF10B981),
+                  ),
+                if (remaining > 0)
+                  BarChartRodStackItem(
+                    achieved.toDouble(),
+                    (achieved + remaining).toDouble(),
+                    const Color(0xFF6366F1),
+                  ),
+              ];
+
               return BarChartGroupData(
                 x: index,
                 barRods: [
@@ -287,18 +302,7 @@ class ProAdmissionPage extends StatelessWidget {
                     toY: (achieved + remaining).toDouble(),
                     width: 15,
                     color: Colors.transparent, // Background managed by stack
-                    rodStackItems: [
-                      BarChartRodStackItem(
-                        0,
-                        achieved.toDouble(),
-                        const Color(0xFF10B981),
-                      ),
-                      BarChartRodStackItem(
-                        achieved.toDouble(),
-                        (achieved + remaining).toDouble(),
-                        const Color(0xFF6366F1),
-                      ),
-                    ],
+                    rodStackItems: stackItems,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ],
@@ -319,7 +323,7 @@ class ProAdmissionPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: DataTable(
-          headingRowColor: MaterialStateProperty.all(const Color(0xFF43A047)),
+          headingRowColor: WidgetStateProperty.all(const Color(0xFF43A047)),
           headingTextStyle: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -347,8 +351,12 @@ class ProAdmissionPage extends StatelessWidget {
             final paid = data['paid'] as int;
             final npaid = data['npaid'] as int;
 
-            final achievedPct = ((achieved / target) * 100).toStringAsFixed(0);
-            final paidPct = ((paid / (paid + npaid)) * 100).toStringAsFixed(0);
+            final achievedPct = target > 0
+                ? ((achieved / target) * 100).toStringAsFixed(0)
+                : "0";
+            final paidPct = (paid + npaid) > 0
+                ? ((paid / (paid + npaid)) * 100).toStringAsFixed(0)
+                : "0";
 
             return DataRow(
               cells: [

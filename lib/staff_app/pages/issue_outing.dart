@@ -113,7 +113,7 @@ class _IssueOutingPageState extends State<IssueOutingPage> {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 10,
-        bottom: 20,
+        bottom: 25,
         left: 20,
         right: 20,
       ),
