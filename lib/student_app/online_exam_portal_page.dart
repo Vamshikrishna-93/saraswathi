@@ -17,6 +17,7 @@ class _OnlineExamPortalPageState extends State<OnlineExamPortalPage> {
   int _secondsRemaining = 30;
   Timer? _timer;
   Map<String, dynamic>? _studentData;
+  // ignore: unused_field
   bool _isLoadingProfile = true;
 
   @override
