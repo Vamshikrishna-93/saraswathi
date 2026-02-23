@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:student_app/student_app/dashboard_page.dart';
 import 'package:student_app/student_app/services/auth_service.dart';
 import 'package:student_app/student_app/services/session_service.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
+import 'package:student_app/theme_controllers.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -67,8 +69,9 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFF2F8FED),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -76,13 +79,16 @@ class _SignInPageState extends State<SignInPage> {
             constraints: const BoxConstraints(maxWidth: 420),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              border: Border.all(
+                color: StudentTheme.containerBorderColor(context),
+              ),
+              boxShadow: [
                 BoxShadow(
                   blurRadius: 20,
-                  color: Colors.black12,
-                  offset: Offset(0, 10),
+                  color: isDark ? Colors.black54 : Colors.black12,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
@@ -103,11 +109,11 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   const SizedBox(height: 8),
 
-                  const Text(
+                  Text(
                     "Enter your email address and password to access admin panel.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black,
+                      color: isDark ? Colors.white70 : Colors.black,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -222,8 +228,8 @@ class StudentLoginWrapper extends StatelessWidget {
       future: SessionService.isLoggedIn(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            backgroundColor: Color(0xFF2F8FED),
+          return Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -241,8 +247,12 @@ class StudentLoginWrapper extends StatelessWidget {
         }
 
         if (snapshot.data == true) {
-          // If already logged in, show Dashboard directly
-          return const DashboardPage();
+          // Wrap Dashboard in ThemeControllerWrapper so it uses StudentTheme
+          // (independent of the staff app's GetMaterialApp theme)
+          return ThemeControllerWrapper(
+            themeController: StudentThemeController.themeMode,
+            child: const DashboardPage(),
+          );
         }
 
         // If not logged in, show the Sign In page

@@ -4,6 +4,7 @@ import 'package:student_app/student_app/receipt_page.dart';
 import 'package:student_app/student_app/services/fee_services_page.dart';
 import 'package:student_app/student_app/studentdrawer.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -98,18 +99,17 @@ class _HostelFeesPageState extends State<HostelFeesPage>
 
   // BACKGROUND
   Color get bg => Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF020617) // deep navy background
+      ? Colors
+            .black // pure black background
       : const Color(0xFFF8FAFC);
 
   // CARD SURFACE
   Color get card => Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF020617) // seamless dark surface
+      ? const Color(0xFF383840) // dark gray surface
       : Colors.white;
 
   // BORDER
-  Color get border => Theme.of(context).brightness == Brightness.dark
-      ? const Color(0xFF334155) // slate border
-      : const Color(0xFFE5E7EB);
+  Color get border => StudentTheme.containerBorderColor(context);
 
   // PRIMARY TEXT (WHITE IN DARK MODE)
   Color get textPrimary => Theme.of(context).brightness == Brightness.dark

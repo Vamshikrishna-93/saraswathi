@@ -8,6 +8,7 @@ import 'package:student_app/student_app/hostel_fee_page.dart';
 import 'package:student_app/student_app/outings_permissions_page.dart';
 import 'package:student_app/student_app/remarks_page.dart';
 import 'package:student_app/student_app/marks_page.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/theme_controllers.dart';
 
 class StudentDrawerPage extends StatelessWidget {
@@ -38,10 +39,11 @@ class StudentDrawerPage extends StatelessWidget {
                     height: 80,
                     width: 80,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey.shade800
-                          : Colors.grey.shade200,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: StudentTheme.containerBorderColor(context),
+                      ),
                     ),
                     padding: const EdgeInsets.all(10),
                     child: Image.asset('assets/logo.png', fit: BoxFit.contain),
@@ -237,16 +239,22 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color,
+          color: isDark ? Theme.of(context).cardColor : color,
           borderRadius: BorderRadius.circular(20),
+          border: isDark
+              ? Border.all(color: StudentTheme.containerBorderColor(context))
+              : null,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.45),
+              color: isDark
+                  ? Colors.black.withOpacity(0.3)
+                  : color.withOpacity(0.45),
               blurRadius: 14,
               offset: const Offset(0, 8),
             ),
@@ -255,7 +263,7 @@ class _DashboardCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 46, color: Colors.white),
+            Icon(icon, size: 46, color: isDark ? color : Colors.white),
             const SizedBox(height: 12),
             Text(
               title,

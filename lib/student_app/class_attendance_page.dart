@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
 import 'attendence_month_details_page.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/theme_controllers.dart';
 import 'package:student_app/student_app/services/attendance_service.dart';
 import 'package:student_app/student_app/model/class_attendance.dart';
@@ -291,6 +292,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -471,6 +473,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -563,6 +566,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -656,6 +660,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -749,6 +754,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -842,6 +848,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -1286,6 +1293,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -2080,6 +2088,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

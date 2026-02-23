@@ -75,92 +75,85 @@ class SsJcApp extends StatelessWidget {
     // Bind to Staff ThemeController for app-wide theme
     final themeController = Get.find<staff.ThemeController>();
 
-    return Obx(
-      () => GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'SSJC',
+    // Determine initial theme mode
+    final initialTheme = isLoggedIn
+        ? StudentThemeController.themeMode.value
+        : (themeController.isDark.value ? ThemeMode.dark : ThemeMode.light);
 
-        // 🌗 THEME (Staff App Theme)
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: themeController.isDark.value
-            ? ThemeMode.dark
-            : ThemeMode.light,
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'SSJC',
 
-        // 🚀 Entry Point: Auto-redirect if student is logged in, else Role Selection
-        home: isLoggedIn
-            ? ThemeControllerWrapper(
-                themeController: StudentThemeController.themeMode,
-                child: const StudentLoginWrapper(),
-              )
-            : const HomePage(),
+      // 🌗 THEME (Staff App Theme)
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: initialTheme,
 
-        getPages: [
-          // 🔑 AUTH FLOW
-          // Note: '/splash' in Staff App is Staff Splash.
-          // Since we start with HomePage (Role), we might not use '/splash' as initial route.
-          //  GetPage(name: '/splash', page: () => const SplashPage()),
-          GetPage(name: '/login', page: () => const LoginPage()),
-          GetPage(name: '/dashboard', page: () => const HomeDashboardPage()),
-          GetPage(name: '/profile', page: () => const ProfilePage()),
+      // 🚀 Entry Point: Auto-redirect if student is logged in, else Role Selection
+      home: isLoggedIn ? const StudentLoginWrapper() : const HomePage(),
 
-          // 👨🏫 STAFF
-          GetPage(name: '/staff', page: () => const StaffListPage()),
-          GetPage(
-            name: '/staffAttendance',
-            page: () => const StaffAttendancePage(),
-          ),
-          GetPage(name: '/classAttendance', page: () => ClassAttendancePage()),
+      getPages: [
+        // 🔑 AUTH FLOW
+        // Note: '/splash' in Staff App is Staff Splash.
+        // Since we start with HomePage (Role), we might not use '/splash' as initial route.
+        //  GetPage(name: '/splash', page: () => const SplashPage()),
+        GetPage(name: '/login', page: () => const LoginPage()),
+        GetPage(name: '/dashboard', page: () => const HomeDashboardPage()),
+        GetPage(name: '/profile', page: () => const ProfilePage()),
 
-          // 🚶 OUTING
-          GetPage(name: '/outingList', page: () => const OutingListPage()),
-          GetPage(
-            name: '/outingPending',
-            page: () => const OutingPendingListPage(),
-          ),
+        // 👨🏫 STAFF
+        GetPage(name: '/staff', page: () => const StaffListPage()),
+        GetPage(
+          name: '/staffAttendance',
+          page: () => const StaffAttendancePage(),
+        ),
+        GetPage(name: '/classAttendance', page: () => ClassAttendancePage()),
 
-          // 📝 ATTENDANCE
-          GetPage(
-            name: '/verifyAttendance',
-            page: () => const VerifyAttendancePage(),
-          ),
-          GetPage(
-            name: '/studentAttendance',
-            page: () => const StudentAttendancePage(),
-          ),
+        // 🚶 OUTING
+        GetPage(name: '/outingList', page: () => const OutingListPage()),
+        GetPage(
+          name: '/outingPending',
+          page: () => const OutingPendingListPage(),
+        ),
 
-          // 📚 EXAMS
-          GetPage(
-            name: '/examCategoryList',
-            page: () => const ExamCategoryListPage(),
-          ),
-          GetPage(name: '/examsList', page: () => const ExamsListPage()),
-          GetPage(
-            name: '/marksUpload',
-            page: () => const SubjectMarksUploadPage(),
-          ),
+        // 📝 ATTENDANCE
+        GetPage(
+          name: '/verifyAttendance',
+          page: () => const VerifyAttendancePage(),
+        ),
+        GetPage(
+          name: '/studentAttendance',
+          page: () => const StudentAttendancePage(),
+        ),
 
-          // 💰 FEES
-          GetPage(name: '/feeHeads', page: () => const FeeHeadPage()),
+        // 📚 EXAMS
+        GetPage(
+          name: '/examCategoryList',
+          page: () => const ExamCategoryListPage(),
+        ),
+        GetPage(name: '/examsList', page: () => const ExamsListPage()),
+        GetPage(
+          name: '/marksUpload',
+          page: () => const SubjectMarksUploadPage(),
+        ),
 
-          // 🏨 HOSTEL / ROOMS
-          GetPage(name: '/rooms', page: () => const RoomsPage()),
-          GetPage(
-            name: '/hostelMembers',
-            page: () => const HostelMembersPage(),
-          ),
-          GetPage(name: '/floors', page: () => const FloorsPage()),
-          GetPage(name: '/addHostel', page: () => const AddHostelPage()),
-          GetPage(
-            name: '/hostelAttendanceFilter',
-            page: () => const HostelAttendanceFilterPage(),
-          ),
-          GetPage(
-            name: '/hostelAttendanceResult',
-            page: () => const HostelAttendanceResultPage(),
-          ),
-        ],
-      ),
+        // 💰 FEES
+        GetPage(name: '/feeHeads', page: () => const FeeHeadPage()),
+
+        // 🏨 HOSTEL / ROOMS
+        GetPage(name: '/rooms', page: () => const RoomsPage()),
+        GetPage(name: '/hostelMembers', page: () => const HostelMembersPage()),
+        GetPage(name: '/floors', page: () => const FloorsPage()),
+        GetPage(name: '/addHostel', page: () => const AddHostelPage()),
+        GetPage(
+          name: '/hostelAttendanceFilter',
+          page: () => const HostelAttendanceFilterPage(),
+        ),
+        GetPage(
+          name: '/hostelAttendanceResult',
+          page: () => const HostelAttendanceResultPage(),
+        ),
+      ],
     );
   }
 }

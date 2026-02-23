@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 
 class HeaderCell extends StatelessWidget {
   final String title;
@@ -77,6 +78,7 @@ class MarksStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: theme.brightness == Brightness.dark
@@ -297,7 +299,7 @@ class SubjectRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.08)),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
       ),
       child: Row(
         children: [
@@ -426,11 +428,7 @@ class ExamHistoryRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.grey.shade700
-              : Colors.grey.shade200,
-        ),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

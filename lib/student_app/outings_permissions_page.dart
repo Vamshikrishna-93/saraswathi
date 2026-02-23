@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:student_app/student_app/outing_details_page.dart';
 import 'package:student_app/student_app/services/outing_service.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/student_app/studentdrawer.dart';
 
 class OutingsPermissionsPage extends StatefulWidget {
@@ -415,6 +416,9 @@ class _OutingsPermissionsPageState extends State<OutingsPermissionsPage> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: StudentTheme.containerBorderColor(context),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Theme.of(context).brightness == Brightness.dark

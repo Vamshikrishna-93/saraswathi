@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -29,6 +30,7 @@ class StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
@@ -46,16 +48,17 @@ class StatCard extends StatelessWidget {
             children: [
               Icon(icon, color: iconColor, size: 28),
               const SizedBox(width: 8),
-              if (content != null)
-                content!
-              else
-                Text(
-                  value,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: iconColor,
-                  ),
-                ),
+              Expanded(
+                child: content != null
+                    ? content!
+                    : Text(
+                        value,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: iconColor,
+                        ),
+                      ),
+              ),
             ],
           ),
           const SizedBox(height: 8),

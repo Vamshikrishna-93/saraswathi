@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 
 enum TimeRange { academicYear, last3Months, last6Months, lastMonth }
 
@@ -654,6 +655,7 @@ class DashboardSectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).brightness == Brightness.dark

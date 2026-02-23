@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/theme_controllers.dart';
 import 'package:student_app/student_app/services/calendar_service.dart';
 
@@ -144,6 +145,9 @@ class _StudentCalendarState extends State<StudentCalendar> {
                 decoration: BoxDecoration(
                   color: theme.cardColor,
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: StudentTheme.containerBorderColor(context),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -330,7 +334,7 @@ class _StudentCalendarState extends State<StudentCalendar> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: events.length,
                 separatorBuilder: (context, index) => Divider(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: StudentTheme.containerBorderColor(context),
                   indent: 16,
                   endIndent: 16,
                   height: 1,

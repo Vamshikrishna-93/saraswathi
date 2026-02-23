@@ -100,7 +100,9 @@ class _MarksGradesPageState extends State<MarksGradesPage> {
           ],
         ),
         const SizedBox(height: 20),
-        Row(
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
           children: [
             OutlinedButton.icon(
               onPressed: () {},
@@ -117,7 +119,6 @@ class _MarksGradesPageState extends State<MarksGradesPage> {
                 side: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
-            const SizedBox(width: 12),
             ElevatedButton.icon(
               onPressed: () async {
                 try {

@@ -202,89 +202,116 @@ class _DocumentsPageState extends State<DocumentsPage>
   // ================= HEADER =================
 
   Widget _header() {
-    return Row(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.folder_outlined, size: 28, color: textPrimary),
-              const SizedBox(height: 12),
-              Text(
-                "Documents",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: textPrimary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Manage your student\n"
-                "documents and\n"
-                "verifications",
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.55,
-                  color: textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Top section with Icon and Title
         Row(
           children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) =>
-                      const UploadDocumentDialog(initialCategory: ''),
-                );
-              },
-              icon: const Icon(Icons.upload, size: 18),
-              label: const Text("Upload Document"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.check_circle_outline,
+                color: Colors.white,
+                size: 30,
               ),
             ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              onPressed: _refreshData,
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text("Refresh"),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: textPrimary,
-                side: BorderSide(color: border),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+            const SizedBox(width: 16),
+            Text(
+              "Documents",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF7C3AED),
+                letterSpacing: -0.5,
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        // Subtitle text from original page
+        Text(
+          "Manage your student documents and verifications",
+          style: TextStyle(
+            fontSize: 15,
+            color: textSecondary,
+            letterSpacing: 0.1,
+          ),
+        ),
+        const SizedBox(height: 24),
+        // Refresh Button (Solid)
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _refreshData,
+            icon: const Icon(Icons.refresh, size: 20),
+            label: const Text("Refresh"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Upload Document Button (Outlined, styled like Download Report)
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const UploadDocumentDialog(initialCategory: ''),
+              );
+            },
+            icon: Icon(
+              Icons.upload_file_outlined,
+              size: 20,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+            label: Text(
+              "Upload Document",
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 16,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(
+                color: isDark ? Colors.grey.shade800 : const Color(0xFFE2E8F0),
+                width: 1.5,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              backgroundColor: isDark ? Colors.transparent : Colors.white,
+            ),
+          ),
         ),
       ],
     );

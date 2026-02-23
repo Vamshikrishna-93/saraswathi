@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:student_app/theme_controllers.dart';
 
 class WeeklyTimetablePage extends StatelessWidget {
   const WeeklyTimetablePage({super.key});
@@ -10,137 +9,126 @@ class WeeklyTimetablePage extends StatelessWidget {
     final today = DateTime.now();
     final currentDayIndex = today.weekday - 1; // 0 = Monday, 6 = Sunday
 
-    return ThemeControllerWrapper(
-      themeController: StudentThemeController.themeMode,
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Scaffold(
-            backgroundColor: theme.scaffoldBackgroundColor,
-
-            body: SafeArea(
-              child: Column(
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Current Day Indicator
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: theme.cardColor,
+              child: Row(
                 children: [
-                  // Current Day Indicator
+                  Icon(
+                    Icons.calendar_today,
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.blue.shade300
+                        : Colors.blue.shade700,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _getDayName(currentDayIndex),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textTheme.bodyLarge!.color,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                      horizontal: 12,
+                      vertical: 4,
                     ),
-                    color: theme.cardColor,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: theme.brightness == Brightness.dark
-                              ? Colors.blue.shade300
-                              : Colors.blue.shade700,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _getDayName(currentDayIndex),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: theme.textTheme.bodyLarge!.color,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.blue.shade900
-                                : Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.blue.shade700
-                                  : Colors.blue.shade200,
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            "Today",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.blue.shade300
-                                  : Colors.blue.shade700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _DaySchedule(
-                            dayName: "Monday",
-                            isToday: currentDayIndex == 0,
-                            schedules: _getMondaySchedule(),
-                          ),
-                          _DaySchedule(
-                            dayName: "Tuesday",
-                            isToday: currentDayIndex == 1,
-                            schedules: _getTuesdaySchedule(),
-                          ),
-                          _DaySchedule(
-                            dayName: "Wednesday",
-                            isToday: currentDayIndex == 2,
-                            schedules: _getWednesdaySchedule(),
-                          ),
-                          _DaySchedule(
-                            dayName: "Thursday",
-                            isToday: currentDayIndex == 3,
-                            schedules: _getThursdaySchedule(),
-                          ),
-                          _DaySchedule(
-                            dayName: "Friday",
-                            isToday: currentDayIndex == 4,
-                            schedules: _getFridaySchedule(),
-                          ),
-                          _DaySchedule(
-                            dayName: "Saturday",
-                            isToday: currentDayIndex == 5,
-                            schedules: _getSaturdaySchedule(),
-                            isLast: true,
-                          ),
-                        ],
+                    decoration: BoxDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.blue.shade900
+                          : Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.blue.shade700
+                            : Colors.blue.shade200,
+                        width: 1,
                       ),
                     ),
-                  ),
-
-                  // Back to Day View Button
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
+                    child: Text(
+                      "Today",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.blue.shade300
+                            : Colors.blue.shade700,
+                      ),
                     ),
-                    child: const Center(child: _BackToDayViewButton()),
                   ),
                 ],
               ),
             ),
-          );
-        },
+
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _DaySchedule(
+                      dayName: "Monday",
+                      isToday: currentDayIndex == 0,
+                      schedules: _getMondaySchedule(),
+                    ),
+                    _DaySchedule(
+                      dayName: "Tuesday",
+                      isToday: currentDayIndex == 1,
+                      schedules: _getTuesdaySchedule(),
+                    ),
+                    _DaySchedule(
+                      dayName: "Wednesday",
+                      isToday: currentDayIndex == 2,
+                      schedules: _getWednesdaySchedule(),
+                    ),
+                    _DaySchedule(
+                      dayName: "Thursday",
+                      isToday: currentDayIndex == 3,
+                      schedules: _getThursdaySchedule(),
+                    ),
+                    _DaySchedule(
+                      dayName: "Friday",
+                      isToday: currentDayIndex == 4,
+                      schedules: _getFridaySchedule(),
+                    ),
+                    _DaySchedule(
+                      dayName: "Saturday",
+                      isToday: currentDayIndex == 5,
+                      schedules: _getSaturdaySchedule(),
+                      isLast: true,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Back to Day View Button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: const Center(child: _BackToDayViewButton()),
+            ),
+          ],
+        ),
       ),
     );
   }

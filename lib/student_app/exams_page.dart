@@ -573,174 +573,192 @@ class _ExamsPageState extends State<ExamsPage> {
                                 const OnlineExamBanner(),
                               const SizedBox(height: 24),
                               // Filters: Dropdown + Search
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            theme.brightness == Brightness.dark
-                                            ? theme.colorScheme.surface
-                                            : Colors.white,
-                                        border: Border.all(
-                                          color: theme.dividerColor,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          value: _selectedSubject,
-                                          isExpanded: true,
-                                          dropdownColor: theme.cardColor,
-                                          items: _subjects
-                                              .map(
-                                                (s) => DropdownMenuItem(
-                                                  value: s,
-                                                  child: Text(
-                                                    s,
-                                                    style: TextStyle(
-                                                      color: theme
-                                                          .textTheme
-                                                          .bodyMedium
-                                                          ?.color,
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                              .toList(),
-                                          onChanged: (val) {
-                                            if (val != null)
-                                              setState(
-                                                () => _selectedSubject = val,
-                                              );
-                                          },
-                                        ),
-                                      ),
-                                    ),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minWidth:
+                                        MediaQuery.of(context).size.width - 32,
                                   ),
-                                  const SizedBox(width: 12),
-                                  if (_selectedTabIndex == 2) ...[
-                                    Expanded(
-                                      flex: 2,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              theme.brightness ==
-                                                  Brightness.dark
-                                              ? theme.colorScheme.surface
-                                              : Colors.white,
-                                          border: Border.all(
-                                            color: theme.dividerColor,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                theme.brightness ==
+                                                    Brightness.dark
+                                                ? theme.colorScheme.surface
+                                                : Colors.white,
+                                            border: Border.all(
+                                              color: theme.dividerColor,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
-                                        ),
-                                        child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
-                                            value: _selectedProctoringType,
-                                            isExpanded: true,
-                                            dropdownColor: theme.cardColor,
-                                            items: _proctoringTypes
-                                                .map(
-                                                  (s) => DropdownMenuItem(
-                                                    value: s,
-                                                    child: Text(
-                                                      s,
-                                                      style: TextStyle(
-                                                        color: theme
-                                                            .textTheme
-                                                            .bodyMedium
-                                                            ?.color,
+                                          child: DropdownButtonHideUnderline(
+                                            child: DropdownButton<String>(
+                                              value: _selectedSubject,
+                                              isExpanded: true,
+                                              dropdownColor: theme.cardColor,
+                                              items: _subjects
+                                                  .map(
+                                                    (s) => DropdownMenuItem(
+                                                      value: s,
+                                                      child: Text(
+                                                        s,
+                                                        style: TextStyle(
+                                                          color: theme
+                                                              .textTheme
+                                                              .bodyMedium
+                                                              ?.color,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                )
-                                                .toList(),
-                                            onChanged: (val) {
-                                              if (val != null)
-                                                setState(
-                                                  () =>
-                                                      _selectedProctoringType =
-                                                          val,
-                                                );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                  ],
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextField(
-                                      onChanged: (val) =>
-                                          setState(() => _searchQuery = val),
-                                      style: TextStyle(
-                                        color:
-                                            theme.textTheme.bodyMedium?.color,
-                                      ),
-                                      decoration: InputDecoration(
-                                        filled: true,
-                                        fillColor:
-                                            theme.brightness == Brightness.dark
-                                            ? theme.colorScheme.surface
-                                            : Colors.white,
-                                        hintText: _selectedTabIndex == 2
-                                            ? "Search online exams..."
-                                            : "Search exams...",
-                                        hintStyle: TextStyle(
-                                          color:
-                                              theme.textTheme.bodySmall?.color,
-                                        ),
-                                        prefixIcon: Icon(
-                                          Icons.search,
-                                          size: 20,
-                                          color:
-                                              theme.textTheme.bodySmall?.color,
-                                        ),
-                                        suffixIcon: _selectedTabIndex == 2
-                                            ? Icon(
-                                                Icons.search,
-                                                size: 20,
-                                                color: theme
-                                                    .textTheme
-                                                    .bodySmall
-                                                    ?.color,
-                                              )
-                                            : null,
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          borderSide: BorderSide(
-                                            color: theme.dividerColor,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          borderSide: BorderSide(
-                                            color: theme.dividerColor,
-                                          ),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 0,
+                                                  )
+                                                  .toList(),
+                                              onChanged: (val) {
+                                                if (val != null)
+                                                  setState(
+                                                    () =>
+                                                        _selectedSubject = val,
+                                                  );
+                                              },
                                             ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      const SizedBox(width: 12),
+                                      if (_selectedTabIndex == 2) ...[
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  theme.brightness ==
+                                                      Brightness.dark
+                                                  ? theme.colorScheme.surface
+                                                  : Colors.white,
+                                              border: Border.all(
+                                                color: theme.dividerColor,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton<String>(
+                                                value: _selectedProctoringType,
+                                                isExpanded: true,
+                                                dropdownColor: theme.cardColor,
+                                                items: _proctoringTypes
+                                                    .map(
+                                                      (s) => DropdownMenuItem(
+                                                        value: s,
+                                                        child: Text(
+                                                          s,
+                                                          style: TextStyle(
+                                                            color: theme
+                                                                .textTheme
+                                                                .bodyMedium
+                                                                ?.color,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                    .toList(),
+                                                onChanged: (val) {
+                                                  if (val != null)
+                                                    setState(
+                                                      () =>
+                                                          _selectedProctoringType =
+                                                              val,
+                                                    );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                      ],
+                                      Expanded(
+                                        flex: 3,
+                                        child: TextField(
+                                          onChanged: (val) => setState(
+                                            () => _searchQuery = val,
+                                          ),
+                                          style: TextStyle(
+                                            color: theme
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.color,
+                                          ),
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            fillColor:
+                                                theme.brightness ==
+                                                    Brightness.dark
+                                                ? theme.colorScheme.surface
+                                                : Colors.white,
+                                            hintText: _selectedTabIndex == 2
+                                                ? "Search online exams..."
+                                                : "Search exams...",
+                                            hintStyle: TextStyle(
+                                              color: theme
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.color,
+                                            ),
+                                            prefixIcon: Icon(
+                                              Icons.search,
+                                              size: 20,
+                                              color: theme
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.color,
+                                            ),
+                                            suffixIcon: _selectedTabIndex == 2
+                                                ? Icon(
+                                                    Icons.search,
+                                                    size: 20,
+                                                    color: theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.color,
+                                                  )
+                                                : null,
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              borderSide: BorderSide(
+                                                color: theme.dividerColor,
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              borderSide: BorderSide(
+                                                color: theme.dividerColor,
+                                              ),
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 0,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
 
                               const SizedBox(height: 24),

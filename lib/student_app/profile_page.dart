@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:student_app/student_app/model/student_profile.dart';
 import 'package:student_app/student_app/services/student_profile_service.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:student_app/student_app/change_password_page.dart';
@@ -326,9 +327,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isDark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade200,
+                          color: StudentTheme.containerBorderColor(context),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -951,7 +950,7 @@ class DetailsCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade800,
+            color: theme.textTheme.bodySmall?.color,
           ),
         ),
         const SizedBox(height: 8),
@@ -1159,7 +1158,7 @@ class _EditProfileFormState extends State<EditProfileForm> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade700,
+                                    color: theme.textTheme.bodySmall?.color,
                                   ),
                                 ),
                                 const SizedBox(height: 8),

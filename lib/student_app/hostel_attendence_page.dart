@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math' as math;
 import 'package:student_app/student_app/student_app_bar.dart';
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/student_app/hostel_month_detail_page.dart';
 import 'package:student_app/student_app/model/hostel_attendance.dart';
 import 'package:student_app/student_app/services/hostel_attendance_service.dart';
@@ -233,6 +234,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -547,6 +549,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -644,6 +647,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -735,6 +739,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -826,6 +831,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -917,6 +923,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -1209,6 +1216,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -1422,6 +1430,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -1686,6 +1695,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

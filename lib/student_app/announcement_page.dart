@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:student_app/theme_controllers.dart';
+
 import 'model/anouncement.dart';
 
 class AnnouncementsDialog extends StatefulWidget {
@@ -115,230 +115,194 @@ class _AnnouncementsDialogState extends State<AnnouncementsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return ThemeControllerWrapper(
-      themeController: StudentThemeController.themeMode,
-      child: Builder(
-        builder: (context) {
-          final theme = Theme.of(context);
-          return Scaffold(
-            backgroundColor: theme.scaffoldBackgroundColor,
-            body: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Scrollbar(
-                      thumbVisibility: true,
-                      child: SingleChildScrollView(
-                        child: Column(
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+          children: [
+            Expanded(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Back Button
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
+                        child: Row(
                           children: [
-                            // Back Button
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.arrow_back,
-                                      color: theme.textTheme.bodyLarge?.color,
-                                    ),
-                                    onPressed: () => Navigator.pop(context),
-                                    tooltip: "Back",
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: theme.textTheme.bodyLarge?.color,
-                                    ),
-                                  ),
-                                ],
+                            IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: theme.textTheme.bodyLarge?.color,
                               ),
+                              onPressed: () => Navigator.pop(context),
+                              tooltip: "Back",
                             ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      "All Announcements (${announcements.length})",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.textTheme.bodyLarge?.color,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Divider(
-                              height: 1,
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                children: List.generate(
-                                  pageData.length,
-                                  (index) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: AnnouncementCard(
-                                      item: pageData[index],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Divider(
-                              height: 1,
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Page $currentPage of $totalPages\n"
-                                    "Showing ${(currentPage - 1) * itemsPerPage + 1}"
-                                    "-${((currentPage - 1) * itemsPerPage + pageData.length)} "
-                                    "of ${announcements.length} announcements",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: theme.textTheme.bodyLarge?.color,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      OutlinedButton.icon(
-                                        onPressed: currentPage > 1
-                                            ? () =>
-                                                  setState(() => currentPage--)
-                                            : null,
-                                        icon: const Icon(
-                                          Icons.chevron_left,
-                                          size: 18,
-                                        ),
-                                        label: const Text("Previous"),
-                                      ),
-                                      Row(
-                                        children: List.generate(totalPages, (
-                                          index,
-                                        ) {
-                                          final page = index + 1;
-                                          final isActive = page == currentPage;
-
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                            ),
-                                            child: GestureDetector(
-                                              onTap: () => setState(
-                                                () => currentPage = page,
-                                              ),
-                                              child: Container(
-                                                width: 36,
-                                                height: 36,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                  color: isActive
-                                                      ? const Color(0xFF2563EB)
-                                                      : theme.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                    color: const Color(
-                                                      0xFF2563EB,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  "$page",
-                                                  style: TextStyle(
-                                                    color: isActive
-                                                        ? Colors.white
-                                                        : const Color(
-                                                            0xFF2563EB,
-                                                          ),
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                      OutlinedButton.icon(
-                                        onPressed: currentPage < totalPages
-                                            ? () =>
-                                                  setState(() => currentPage++)
-                                            : null,
-                                        label: const Text("Next"),
-                                        icon: const Icon(
-                                          Icons.chevron_right,
-                                          size: 18,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                            const SizedBox(width: 4),
+                            Text(
+                              "",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: theme.textTheme.bodyLarge?.color,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      border: Border(
-                        top: BorderSide(
-                          color: theme.brightness == Brightness.dark
-                              ? Colors.grey.shade700
-                              : Colors.grey.shade300,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "All Announcements (${announcements.length})",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.brightness == Brightness.dark
-                              ? Colors.grey.shade700
-                              : Colors.grey.shade600,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 22,
-                            vertical: 12,
+                      Divider(height: 1, color: theme.dividerColor),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: List.generate(
+                            pageData.length,
+                            (index) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: AnnouncementCard(item: pageData[index]),
+                            ),
                           ),
                         ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Close",
-                          style: TextStyle(color: Colors.white),
+                      ),
+                      Divider(height: 1, color: theme.dividerColor),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 20,
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Page $currentPage of $totalPages\n"
+                              "Showing ${(currentPage - 1) * itemsPerPage + 1}"
+                              "-${((currentPage - 1) * itemsPerPage + pageData.length)} "
+                              "of ${announcements.length} announcements",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: theme.textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: currentPage > 1
+                                      ? () => setState(() => currentPage--)
+                                      : null,
+                                  icon: const Icon(
+                                    Icons.chevron_left,
+                                    size: 18,
+                                  ),
+                                  label: const Text("Previous"),
+                                ),
+                                Row(
+                                  children: List.generate(totalPages, (index) {
+                                    final page = index + 1;
+                                    final isActive = page == currentPage;
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () =>
+                                            setState(() => currentPage = page),
+                                        child: Container(
+                                          width: 36,
+                                          height: 36,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: isActive
+                                                ? const Color(0xFF2563EB)
+                                                : theme.cardColor,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color: const Color(0xFF2563EB),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "$page",
+                                            style: TextStyle(
+                                              color: isActive
+                                                  ? Colors.white
+                                                  : const Color(0xFF2563EB),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ),
+                                OutlinedButton.icon(
+                                  onPressed: currentPage < totalPages
+                                      ? () => setState(() => currentPage++)
+                                      : null,
+                                  label: const Text("Next"),
+                                  icon: const Icon(
+                                    Icons.chevron_right,
+                                    size: 18,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          );
-        },
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                border: Border(top: BorderSide(color: theme.dividerColor)),
+              ),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 12,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

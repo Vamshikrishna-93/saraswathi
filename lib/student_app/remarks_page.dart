@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:student_app/student_app/services/remarks_service.dart';
-
+import 'package:student_app/student_app/theme/student_theme.dart';
 import 'package:student_app/student_app/student_app_bar.dart';
 
 class RemarksPage extends StatefulWidget {
@@ -101,7 +101,7 @@ class _RemarksPageState extends State<RemarksPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const StudentAppBar(title: "Remarks"),
+      appBar: const StudentAppBar(title: ""),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(18),
@@ -167,11 +167,7 @@ class _RemarksPageState extends State<RemarksPage>
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey.shade700
-                            : Colors.grey.shade300,
-                      ),
+                      side: BorderSide(color: Theme.of(context).dividerColor),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 10,
@@ -235,6 +231,9 @@ class _RemarksPageState extends State<RemarksPage>
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: StudentTheme.containerBorderColor(context),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Theme.of(context).brightness == Brightness.dark
@@ -268,11 +267,9 @@ class _RemarksPageState extends State<RemarksPage>
                                     ),
                                   ),
                                   labelColor: const Color(0xFF2563EB),
-                                  unselectedLabelColor:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.grey.shade400
-                                      : Colors.grey.shade700,
+                                  unselectedLabelColor: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.color,
                                   labelStyle: TextStyle(
                                     fontSize: isMobile ? 12 : 14,
                                     fontWeight: FontWeight.w600,
@@ -306,11 +303,9 @@ class _RemarksPageState extends State<RemarksPage>
                           IconButton(
                             icon: Icon(
                               Icons.more_vert,
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.grey.shade400
-                                  : Colors.grey.shade700,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.color,
                             ),
                             onPressed: () {
                               // More options
@@ -395,6 +390,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: StudentTheme.containerBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).brightness == Brightness.dark
@@ -444,7 +440,8 @@ class _RemarksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -470,10 +467,10 @@ class _RemarksList extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.shade100,
+              color: StudentTheme.containerBorderColor(context),
             ),
             boxShadow: [
               BoxShadow(
@@ -532,7 +529,7 @@ class _RemarksList extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white : const Color(0xFF334155),
+                        color: theme.textTheme.bodyLarge?.color,
                         height: 1.4,
                       ),
                     ),
@@ -570,11 +567,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               "No remarks found",
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.grey.shade300
-                    : Colors.grey.shade700,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 8),
