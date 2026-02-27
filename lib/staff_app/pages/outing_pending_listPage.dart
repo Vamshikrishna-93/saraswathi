@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../widgets/skeleton.dart';
 import 'package:student_app/staff_app/controllers/outing_pending_controller.dart';
 import 'package:student_app/staff_app/model/model2.dart';
 import 'package:student_app/staff_app/pages/verify_outing_page.dart';
@@ -16,247 +17,237 @@ class _OutingPendingListPageState extends State<OutingPendingListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF1a1a2e),
-                    Color(0xFF16213e),
-                    Color(0xFF0f3460),
-                    Color(0xFF533483),
-                  ],
-                  stops: [0.0, 0.3, 0.6, 1.0],
-                )
-              : LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).scaffoldBackgroundColor,
-                    Theme.of(context).colorScheme.surface,
-                  ],
-                ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAppTitle(context, isDark),
-                const SizedBox(height: 20),
-                _buildMainCard(context, isDark),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================= TITLE =================
-  Widget _buildAppTitle(BuildContext context, bool isDark) {
-    return InkWell(
-      onTap: () => Navigator.pop(context),
-      child: Row(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
-          const SizedBox(width: 8),
-          Text(
-            "Outing Pending",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= MAIN CARD =================
-  Widget _buildMainCard(BuildContext context, bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.05)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.1)
-              : Theme.of(context).dividerColor,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 20,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // ================= SEARCH =================
-              TextField(
-                onChanged: controller.searchStudent,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F3FF),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                decoration: InputDecoration(
-                  hintText: "Search Student",
-                  hintStyle: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                  filled: true,
-                  fillColor: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Theme.of(context).colorScheme.surface,
-                  prefixIcon: Icon(Icons.search,
-                      color: isDark ? Colors.white : Colors.black54),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
+                child: Column(
+                  children: [
+                    _buildSearchBar(),
+                    const SizedBox(height: 25),
+                    _buildStudentList(),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 18),
-
-              // ================= STUDENT LIST =================
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (controller.filteredStudents.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text("No pending outings found"),
-                  );
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.filteredStudents.length,
-                  itemBuilder: (context, index) {
-                    final StudentModel s = controller.filteredStudents[index];
-
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => VerifyOutingPage(
-                              adm: s.admNo,
-                              name: s.name,
-                              status: s.status,
-                              time: "10:30",
-                              type: "Hospital",
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 18),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withOpacity(0.08)
-                              : Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withOpacity(0.2)
-                                : Theme.of(context).dividerColor,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            // IMAGE
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                image: DecorationImage(
-                                  image:
-                                      (s.image != null && s.image!.isNotEmpty)
-                                          ? NetworkImage(s.image!)
-                                          : const AssetImage("assets/girl.jpg")
-                                              as ImageProvider,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-
-                            // DETAILS
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    s.admNo,
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      color:
-                                          isDark ? Colors.white : Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    s.name,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: isDark
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    "Permission By : ${s.permissionBy}",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  // ================= HEADER =================
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 10,
+        bottom: 30,
+        left: 20,
+        right: 20,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          const Text(
+            "Outing Pending",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= SEARCH BAR =================
+  Widget _buildSearchBar() {
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC084FC).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search, color: Colors.grey, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              onChanged: controller.searchStudent,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: "Search Student or ID",
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= STUDENT LIST =================
+  Widget _buildStudentList() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: StaffLoadingAnimation(),
+          ),
+        );
+      }
+
+      if (controller.filteredStudents.isEmpty) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              "No pending outings found",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        );
+      }
+
+      return ListView.builder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.filteredStudents.length,
+        itemBuilder: (context, index) {
+          final StudentModel s = controller.filteredStudents[index];
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => VerifyOutingPage(
+                    adm: s.admNo,
+                    name: s.name,
+                    status: s.status,
+                    time: "10:30",
+                    type: "Hospital",
+                    imageUrl: s.image,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // IMAGE
+                  Container(
+                    width: 65,
+                    height: 65,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: (s.image != null && s.image!.isNotEmpty)
+                            ? NetworkImage(s.image!)
+                            : const AssetImage("assets/girl.jpg")
+                                  as ImageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // DETAILS
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          s.admNo,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          s.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Permission By : ${s.permissionBy}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 }

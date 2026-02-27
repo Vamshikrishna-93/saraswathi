@@ -8,7 +8,7 @@ class ExamFooter extends StatelessWidget {
   final VoidCallback onClearResponse;
   final VoidCallback? onPrevious;
   final VoidCallback onSaveAndNext;
-  final VoidCallback onShowPalette;
+  final VoidCallback? onShowPalette;
   final VoidCallback onSubmit;
 
   final bool isLastQuestion;
@@ -85,7 +85,7 @@ class ExamFooter extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 100),
+              const SizedBox(width: 80),
               // Previous
               SizedBox(
                 height: 40,
@@ -110,33 +110,34 @@ class ExamFooter extends StatelessWidget {
           // Row 2: Palette Button + Primary Action (Save & Next / Submit)
           Row(
             children: [
-              Expanded(
-                flex: 1,
-                child: SizedBox(
-                  height: 44,
-                  width: 20,
-                  child: OutlinedButton.icon(
-                    onPressed: onShowPalette,
-                    icon: const Icon(Icons.grid_view_rounded, size: 18),
-                    label: const Text(
-                      "All questions",
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF1D58D8),
-                      side: const BorderSide(color: Color(0xFF1D58D8)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+              if (onShowPalette != null) ...[
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: 40,
+                    child: OutlinedButton.icon(
+                      onPressed: onShowPalette,
+                      icon: const Icon(Icons.grid_view_rounded, size: 16),
+                      label: const Text(
+                        "All questions",
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF1D58D8),
+                        side: const BorderSide(color: Color(0xFF1D58D8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 flex: 2,
                 child: SizedBox(
-                  height: 48,
+                  height: 40,
                   child: ElevatedButton(
                     onPressed: isLastQuestion ? onSubmit : onSaveAndNext,
                     style: ElevatedButton.styleFrom(
@@ -144,7 +145,7 @@ class ExamFooter extends StatelessWidget {
                           ? const Color(0xFF1D68F2)
                           : const Color(0xFF22C55E),
                       foregroundColor: Colors.white,
-                      elevation: 4,
+                      elevation: 2,
                       shadowColor: (isLastQuestion ? Colors.blue : Colors.green)
                           .withOpacity(0.3),
                       shape: RoundedRectangleBorder(
@@ -154,7 +155,7 @@ class ExamFooter extends StatelessWidget {
                     child: Text(
                       isLastQuestion ? "Submit Exam" : "Save & Next",
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

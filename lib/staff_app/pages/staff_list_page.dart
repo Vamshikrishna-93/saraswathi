@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../controllers/staff_controller.dart';
 import '../model/staff_model.dart';
-import '../widgets/search_field.dart';
 
 class StaffListPage extends StatefulWidget {
   const StaffListPage({super.key});
@@ -13,17 +12,12 @@ class StaffListPage extends StatefulWidget {
 }
 
 class _StaffListPageState extends State<StaffListPage> {
-  // ================= COLORS =================
-  static const Color dark1 = Color(0xFF1a1a2e);
-  static const Color dark2 = Color(0xFF16213e);
-  static const Color dark3 = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-  static const Color neon = Color(0xFF00FFF5);
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
 
   final StaffController controller = Get.put(StaffController());
-
   String _query = "";
-  bool _snackbarShown = false;
 
   @override
   void initState() {
@@ -33,342 +27,345 @@ class _StaffListPageState extends State<StaffListPage> {
     });
   }
 
-  void _addStaff() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Add Staff (Demo Action)")),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      extendBodyBehindAppBar: true,
-
-      // ================= APP BAR =================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Staff List",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Get.back(),
-        ),
-      ),
-
-      // ================= BODY =================
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // ================= BACKGROUND =================
-          Container(
-            decoration: BoxDecoration(
-              gradient: isDark
-                  ? const LinearGradient(
-                      colors: [dark1, dark2, dark3, purpleDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : LinearGradient(
-                      colors: [
-                        Theme.of(context).scaffoldBackgroundColor,
-                        Theme.of(context).colorScheme.surface,
-                      ],
-                    ),
-            ),
-          ),
-
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                  height:
-                      95), // ================= DEPARTMENT DROPDOWN =================
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(() {
-                  final selected = controller.selectedDepartment.value;
-
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.12)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white24
-                            : Theme.of(context).dividerColor,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        // ✅ ALWAYS HAVE A VALUE
-                        value: controller.uniqueDepartments.contains(selected)
-                            ? selected
-                            : 'ALL',
-
-                        isExpanded: true,
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: isDark ? neon : Colors.black54,
+              // ================= CUSTOM HEADER =================
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 10,
+                  bottom: 25,
+                  left: 20,
+                  right: 20,
+                ),
+                decoration: const BoxDecoration(
+                  color: primaryPurple,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
                         ),
-                        dropdownColor: isDark ? dark2 : Colors.white,
-
-                        // ✅ DROPDOWN ITEMS
-                        items: controller.uniqueDepartments
-                            .map(
-                              (dept) => DropdownMenuItem<String>(
-                                value: dept,
-                                child: Text(
-                                  dept,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white : Colors.black,
-                                    fontWeight: dept == selected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-
-                        // ✅ CHANGE FILTER
-                        onChanged: (value) {
-                          if (value != null) {
-                            controller.setDepartment(value);
-                          }
-                        },
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
                     ),
-                  );
-                }),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ================= SEARCH =================
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color:
-                        isDark ? Colors.white.withOpacity(0.12) : Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white24
-                          : Theme.of(context).dividerColor,
+                    const SizedBox(width: 20),
+                    const Text(
+                      "Staff List",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  child: SearchField(
-                    hint: "Search designation / branch / ID",
-                    hintStyle: TextStyle(
-                      color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-                    ),
-                    textColor: isDark ? Colors.white : Colors.black,
-                    iconColor: isDark ? neon : Colors.black54,
-                    onChanged: (v) => setState(() => _query = v),
-                  ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 16),
-
-              // ================= STAFF LIST =================
-              Expanded(
-                child: Obx(() {
-                  // ERROR SNACKBAR
-                  if (controller.errorMessage.isNotEmpty && !_snackbarShown) {
-                    _snackbarShown = true;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Get.snackbar(
-                        "Error",
-                        controller.errorMessage.value,
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    });
-                  }
-
-                  if (controller.isLoading.value) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  final query = _query.toLowerCase();
-                  final List<StaffModel> filtered =
-                      controller.filteredDesignations.where((s) {
-                    return s.designation.toLowerCase().contains(query) ||
-                        s.branchName.toLowerCase().contains(query) ||
-                        s.id.toString().contains(query);
-                  }).toList();
-
-                  if (filtered.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        "No staff found",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, i) {
-                      final StaffModel s = filtered[i];
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 14),
-                        padding: const EdgeInsets.all(18),
-
-                        // ✅ LIGHT THEME WHITE CARD
-                        decoration: BoxDecoration(
-                          color: isDark ? null : Colors.white,
-                          gradient: isDark
-                              ? LinearGradient(
-                                  colors: [
-                                    dark3.withOpacity(0.55),
-                                    purpleDark.withOpacity(0.55),
-                                  ],
-                                )
-                              : null,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isDark
-                                ? neon.withOpacity(0.35)
-                                : Theme.of(context).dividerColor,
-                            width: 1.2,
+              // ================= CATEGORY FILTER =================
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: const TextSpan(
+                        text: "Category",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: " *",
+                            style: TextStyle(color: Colors.red),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDark
-                                  ? neon.withOpacity(0.22)
-                                  : Colors.black12,
-                              blurRadius: 15,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      final selected = controller.selectedDepartment.value;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.black12),
                         ),
-
-                        child: Row(
-                          children: [
-                            // ================= TEXT SECTION =================
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    s.designation,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          isDark ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    s.branchName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: isDark
-                                          ? const Color(0xFFB5C7E8)
-                                          : Colors.black54,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "ID: ${s.id}",
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.black45,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(width: 12),
-
-                            // ================= SERIAL BADGE =================
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: neon,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                "${i + 1}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value:
+                                controller.uniqueDepartments.contains(selected)
+                                ? selected
+                                : 'ALL',
+                            isExpanded: true,
+                            items: controller.uniqueDepartments.map((dept) {
+                              return DropdownMenuItem<String>(
+                                value: dept,
+                                child: Text(
+                                  dept,
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                              ),
-                            ),
-                          ],
+                              );
+                            }).toList(),
+                            onChanged: (v) {
+                              if (v != null) controller.setDepartment(v);
+                            },
+                          ),
                         ),
                       );
-                    },
-                  );
-                }),
+                    }),
+                  ],
+                ),
+              ),
+
+              // ================= MAIN CONTENT =================
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  padding: const EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                    color: lavenderBg.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: primaryPurple.withOpacity(0.4),
+                            ),
+                          ),
+                          child: TextField(
+                            onChanged: (v) => setState(() => _query = v),
+                            decoration: const InputDecoration(
+                              icon: Icon(
+                                Icons.search,
+                                color: Colors.black54,
+                                size: 20,
+                              ),
+                              hintText: "Search designation / branch",
+                              hintStyle: TextStyle(
+                                color: Colors.black38,
+                                fontSize: 13,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Staff List
+                      Expanded(
+                        child: Obx(() {
+                          if (controller.isLoading.value) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          final query = _query.toLowerCase();
+                          final List<StaffModel> filtered = controller
+                              .filteredDesignations
+                              .where((s) {
+                                return s.designation.toLowerCase().contains(
+                                      query,
+                                    ) ||
+                                    s.branchName.toLowerCase().contains(query);
+                              })
+                              .toList();
+
+                          if (filtered.isEmpty) {
+                            return const Center(child: Text("No staff found"));
+                          }
+
+                          return ListView.builder(
+                            itemCount: filtered.length,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            itemBuilder: (context, index) {
+                              return _buildStaffCard(
+                                filtered[index],
+                                index + 1,
+                              );
+                            },
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 80), // Space for bottom button
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
 
           // ================= ADD STAFF BUTTON =================
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: ElevatedButton.icon(
-                onPressed: _addStaff,
-                icon: Icon(
-                  Icons.add,
-                  color: isDark ? Colors.black : Colors.white,
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () => Get.toNamed('/addStaff'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF7C69FF), Color(0xFFD38DFA)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF7C69FF).withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                label: Text(
-                  "Add Staff",
-                  style: TextStyle(
-                    color: isDark ? Colors.black : Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      isDark ? neon : Theme.of(context).primaryColor,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 22,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 10,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.add, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      "Add Staff",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStaffCard(StaffModel staff, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9E9CFF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  "NO : $index",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  staff.designation.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, thickness: 0.5, color: Colors.black12),
+          ),
+          _buildInfoRow("Branch", staff.branchName),
+          const SizedBox(height: 6),
+          _buildInfoRow("ID", staff.id.toString()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "$label : ",
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

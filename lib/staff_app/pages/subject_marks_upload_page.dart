@@ -5,43 +5,6 @@ import '../controllers/branch_controller.dart';
 import '../controllers/group_controller.dart';
 import '../controllers/course_controller.dart';
 
-/// ---------------- BACKGROUND ----------------
-class SSJCBackground extends StatelessWidget {
-  final Widget child;
-  const SSJCBackground({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: isDark
-            ? const LinearGradient(
-                colors: [
-                  Color(0xFF1a1a2e),
-                  Color(0xFF16213e),
-                  Color(0xFF0f3460),
-                  Color(0xFF533483),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              )
-            : LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).scaffoldBackgroundColor,
-                  Theme.of(context).colorScheme.surface,
-                ],
-              ),
-      ),
-      child: child,
-    );
-  }
-}
-
-/// ---------------- PAGE ----------------
 class SubjectMarksUploadPage extends StatefulWidget {
   const SubjectMarksUploadPage({super.key});
 
@@ -50,7 +13,9 @@ class SubjectMarksUploadPage extends StatefulWidget {
 }
 
 class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
-  static const Color neon = Color(0xFF00FFF5);
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
 
   // ---------------- CONTROLLERS ----------------
   final BranchController branchCtrl = Get.put(BranchController());
@@ -90,7 +55,6 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
   @override
   void initState() {
     super.initState();
-
     branchCtrl.loadBranches();
 
     ever(branchCtrl.branches, (_) {
@@ -98,11 +62,7 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
         final b = branchCtrl.branches.first;
         branch = b.branchName;
         selectedBranchId = b.id;
-
-        groupCtrl.clear();
-        courseCtrl.clear();
         groupCtrl.loadGroups(b.id);
-
         setState(() {});
       }
     });
@@ -112,10 +72,7 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
         final g = groupCtrl.groups.first;
         group = g.name;
         selectedGroupId = g.id;
-
-        courseCtrl.clear();
         courseCtrl.loadCourses(g.id);
-
         setState(() {});
       }
     });
@@ -123,156 +80,161 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: Colors.transparent,
-
-      // ---------------- APP BAR ----------------
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF1a1a2e) : Colors.white,
-        title: Text(
-          "Subject Marks Upload",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ================= CUSTOM HEADER =================
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10,
+              bottom: 25,
+              left: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: primaryPurple,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(35),
+                bottomRight: Radius.circular(35),
+              ),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  "Subject Mark Upload",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Get.back(),
-        ),
-      ),
 
-      body: SSJCBackground(
-        child: Stack(
-          children: [
-            /// ---------------- SCROLL CONTENT ----------------
-            SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 24, 18, 200),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
+                  // ================= FILTER CONTAINER =================
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26),
-                      color: isDark
-                          ? Colors.white.withOpacity(0.05)
-                          : Theme.of(context).cardColor,
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white24
-                            : Theme.of(context).dividerColor,
-                        width: 1.3,
-                      ),
+                      color: lavenderBg.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         /// -------- BRANCH --------
-                        Obx(() => _buildField(
-                              context: context,
-                              label: "Select Branch",
-                              icon: Icons.school,
-                              iconColor: Colors.cyanAccent,
-                              value: branch,
-                              items: branchCtrl.branches
-                                  .map((b) => b.branchName)
-                                  .toList(),
-                              onChanged: (v) {
-                                final b = branchCtrl.branches
-                                    .firstWhere((e) => e.branchName == v);
-
-                                setState(() {
-                                  branch = v;
-                                  group = null;
-                                  course = null;
-                                });
-
-                                groupCtrl.clear();
-                                courseCtrl.clear();
-                                groupCtrl.loadGroups(b.id);
-                              },
-                            )),
+                        _buildLabel("Branch"),
+                        Obx(
+                          () => _buildDropdown(
+                            hint: "Select Branch",
+                            value: branch,
+                            items: branchCtrl.branches
+                                .map((b) => b.branchName)
+                                .toList(),
+                            onChanged: (v) {
+                              final b = branchCtrl.branches.firstWhere(
+                                (e) => e.branchName == v,
+                              );
+                              setState(() {
+                                branch = v;
+                                group = null;
+                                course = null;
+                              });
+                              groupCtrl.loadGroups(b.id);
+                            },
+                          ),
+                        ),
 
                         /// -------- GROUP --------
-                        Obx(() => _buildField(
-                              context: context,
-                              label: groupCtrl.groups.isEmpty
-                                  ? "Select Branch First"
-                                  : "Select Group",
-                              icon: Icons.group,
-                              iconColor: Colors.purpleAccent,
-                              value: group,
-                              items:
-                                  groupCtrl.groups.map((g) => g.name).toList(),
-                              onChanged: groupCtrl.groups.isEmpty
-                                  ? null
-                                  : (v) {
-                                      final g = groupCtrl.groups
-                                          .firstWhere((e) => e.name == v);
-
-                                      setState(() {
-                                        group = v;
-                                        course = null;
-                                      });
-
-                                      courseCtrl.clear();
-                                      courseCtrl.loadCourses(g.id);
-                                    },
-                            )),
+                        _buildLabel("Group"),
+                        Obx(
+                          () => _buildDropdown(
+                            hint: groupCtrl.groups.isEmpty
+                                ? "Select Branch First"
+                                : "Select Group",
+                            value: group,
+                            items: groupCtrl.groups.map((g) => g.name).toList(),
+                            onChanged: groupCtrl.groups.isEmpty
+                                ? null
+                                : (v) {
+                                    final g = groupCtrl.groups.firstWhere(
+                                      (e) => e.name == v,
+                                    );
+                                    setState(() {
+                                      group = v;
+                                      course = null;
+                                    });
+                                    courseCtrl.loadCourses(g.id);
+                                  },
+                          ),
+                        ),
 
                         /// -------- COURSE --------
-                        Obx(() => _buildField(
-                              context: context,
-                              label: courseCtrl.courses.isEmpty
-                                  ? "Select Group First"
-                                  : "Select Course",
-                              icon: Icons.menu_book,
-                              iconColor: Colors.blueAccent,
-                              value: course,
-                              items: courseCtrl.courses
-                                  .map((c) => c.courseName)
-                                  .toList(),
-                              onChanged: courseCtrl.courses.isEmpty
-                                  ? null
-                                  : (v) {
-                                      final c = courseCtrl.courses
-                                          .firstWhere((e) => e.courseName == v);
-                                      setState(() {
-                                        course = v;
-                                        selectedCourseId = c.id;
-                                      });
-                                    },
-                            )),
+                        _buildLabel("Course"),
+                        Obx(
+                          () => _buildDropdown(
+                            hint: courseCtrl.courses.isEmpty
+                                ? "Select Group First"
+                                : "Select Course",
+                            value: course,
+                            items: courseCtrl.courses
+                                .map((c) => c.courseName)
+                                .toList(),
+                            onChanged: courseCtrl.courses.isEmpty
+                                ? null
+                                : (v) {
+                                    final c = courseCtrl.courses.firstWhere(
+                                      (e) => e.courseName == v,
+                                    );
+                                    setState(() {
+                                      course = v;
+                                      selectedCourseId = c.id;
+                                    });
+                                  },
+                          ),
+                        ),
 
-                        _buildField(
-                          context: context,
-                          label: "Select Batch",
-                          icon: Icons.date_range,
-                          iconColor: Colors.orangeAccent,
+                        _buildLabel("Batch"),
+                        _buildDropdown(
+                          hint: "Select Batch",
                           value: batch,
                           items: batches,
                           onChanged: (v) => setState(() => batch = v),
                         ),
 
-                        _buildField(
-                          context: context,
-                          label: "Select Exam",
-                          icon: Icons.assignment,
-                          iconColor: Colors.lightGreenAccent,
+                        _buildLabel("Exam"),
+                        _buildDropdown(
+                          hint: "Select Exam",
                           value: exam,
                           items: exams,
                           onChanged: (v) => setState(() => exam = v),
                         ),
 
-                        _buildField(
-                          context: context,
-                          label: "Select Subject",
-                          icon: Icons.book,
-                          iconColor: Colors.pinkAccent,
+                        _buildLabel("Subject"),
+                        _buildDropdown(
+                          hint: "Select Subject",
                           value: subject,
                           items: subjects,
                           onChanged: (v) => setState(() => subject = v),
@@ -280,34 +242,46 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
 
                         const SizedBox(height: 25),
 
-                        SizedBox(
+                        // ================= GET STUDENTS BUTTON =================
+                        Container(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.groups, color: Colors.black),
-                            label: const Text(
-                              "Get Students",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          height: 55,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF7C69FF), Color(0xFFD38DFA)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: neon,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                        ),
-
-                        const SizedBox(height: 30),
-                        Text(
-                          "2025 © SSJC",
-                          style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black54,
-                            fontSize: 12,
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Get Students",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -316,119 +290,146 @@ class _SubjectMarksUploadPageState extends State<SubjectMarksUploadPage> {
                 ],
               ),
             ),
+          ),
 
-            /// ---------------- BOTTOM BUTTONS ----------------
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.download, color: Colors.white),
-                        label: const Text("Download Format"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        icon:
-                            const Icon(Icons.cloud_upload, color: Colors.white),
-                        label: const Text("Marks Bulk Upload"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          // ================= BOTTOM BAR =================
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
             ),
-          ],
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF7E49FF), Color(0xFFD199FF)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.file_download_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      label: const Text(
+                        "Download Format",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4ACBC9), Color(0xFFA5E68C)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.file_upload_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      label: const Text(
+                        "Mark Bulk Upload",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
         ),
       ),
     );
   }
 
-  /// ---------------- DROPDOWN FIELD ----------------
-  Widget _buildField({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required Color iconColor,
+  Widget _buildDropdown({
+    required String hint,
     required String? value,
     required List<String> items,
-    required Function(String?)? onChanged,
+    required void Function(String?)? onChanged,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.08)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white24 : Theme.of(context).dividerColor,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Row(
-        children: [
-          Icon(icon, color: iconColor, size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: value,
-                dropdownColor: isDark ? const Color(0xFF0f1d3a) : Colors.white,
-                icon: const Icon(Icons.arrow_drop_down, color: neon),
-                hint: Text(
-                  label,
-                  style: TextStyle(
-                    color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-                    fontSize: 16,
-                  ),
-                ),
-                items: items
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(
-                          e,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: onChanged,
-              ),
-            ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: value,
+          hint: Text(
+            hint,
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
           ),
-        ],
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
+          items: items.map((e) {
+            return DropdownMenuItem(
+              value: e,
+              child: Text(
+                e,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
       ),
     );
   }

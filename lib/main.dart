@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:student_app/staff_app/pages/home_dashboard_page.dart';
 import 'package:student_app/staff_app/pages/login_page.dart';
+import 'package:student_app/staff_app/pages/staff_auth_wrapper.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:student_app/home/home_page.dart';
-import 'package:student_app/student_app/signIn_page.dart';
-
-// Student Services & Theme
-import 'package:student_app/student_app/services/session_service.dart';
-import 'package:student_app/student_app/services/student_profile_service.dart';
-// Note: HomePage (Role Select) uses Student's ThemeController internally for AppBar behavior potentially.
-// But Staff Dashboard uses Staff's ThemeController.
-// We primarily initialize Staff's ThemeController for Get.find usage.
+import 'package:student_app/staff_app/pages/splash_page.dart';
+import 'package:student_app/staff_app/pages/verify_attendance_page.dart';
 
 // Staff Controllers
 import 'package:student_app/staff_app/controllers/theme_controller.dart'
     as staff;
 import 'package:student_app/staff_app/controllers/auth_controller.dart';
+import 'package:student_app/staff_app/controllers/main_controller.dart';
 import 'package:student_app/theme_controllers.dart';
 
 // Staff Theme
@@ -33,14 +28,23 @@ import 'package:student_app/staff_app/pages/ClassAttendancePage.dart';
 import 'package:student_app/staff_app/pages/exam_category_list_page.dart';
 import 'package:student_app/staff_app/pages/exam_list_page.dart';
 import 'package:student_app/staff_app/pages/student_attendance.dart';
-import 'package:student_app/staff_app/pages/verify_attendance_page .dart';
 import 'package:student_app/staff_app/pages/Room_page.dart';
 import 'package:student_app/staff_app/pages/hostel_members_page.dart';
 import 'package:student_app/staff_app/pages/floors_page.dart';
 import 'package:student_app/staff_app/pages/add_hostel_page.dart';
+import 'package:student_app/staff_app/pages/student_attendance_filter_page.dart';
 import 'package:student_app/staff_app/pages/hostel_attendance_View_page.dart';
 import 'package:student_app/staff_app/pages/hostel_attendance_result_page.dart';
 import 'package:student_app/staff_app/pages/fee_head_page.dart';
+import 'package:student_app/staff_app/pages/hostel_list_page.dart';
+import 'package:student_app/staff_app/pages/non_hostel_page.dart';
+import 'package:student_app/staff_app/pages/attendance_options_page.dart';
+import 'package:student_app/staff_app/pages/chat_page.dart';
+import 'package:student_app/staff_app/pages/communication_page.dart';
+import 'package:student_app/staff_app/pages/add_staff_page.dart';
+import 'package:student_app/staff_app/pages/staff_biometric_logs_page.dart';
+import 'package:student_app/staff_app/pages/take_staff_attendance_page.dart';
+import 'package:student_app/staff_app/pages/pro_admission_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,33 +56,22 @@ void main() async {
   // 🌗 Global controller (NOT user-specific) - Staff App
   Get.put(staff.ThemeController(), permanent: true);
 
-  // 🔐 AuthController MUST NOT be permanent (multi-user safe) - Staff App
+  // 🔐 AuthController - Staff App
   Get.lazyPut<AuthController>(() => AuthController());
+  Get.put(StaffMainController(), permanent: true);
 
-  // Check Student Logged In Status
-  final bool isLoggedIn = await SessionService.isLoggedIn();
-
-  if (isLoggedIn) {
-    // ignore: unawaited_futures
-    StudentProfileService.fetchAndSetProfileData();
-  }
-
-  runApp(SsJcApp(isLoggedIn: isLoggedIn));
+  runApp(const SsJcApp());
 }
 
 class SsJcApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const SsJcApp({super.key, required this.isLoggedIn});
+  const SsJcApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Bind to Staff ThemeController for app-wide theme
     final themeController = Get.find<staff.ThemeController>();
-
-    // Determine initial theme mode
-    final initialTheme = isLoggedIn
-        ? StudentThemeController.themeMode.value
-        : (themeController.isDark.value ? ThemeMode.dark : ThemeMode.light);
+    final initialTheme = themeController.isDark.value
+        ? ThemeMode.dark
+        : ThemeMode.light;
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
@@ -89,20 +82,28 @@ class SsJcApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: initialTheme,
 
-      // 🚀 Entry Point: Auto-redirect if student is logged in, else Role Selection
-      home: isLoggedIn ? const StudentLoginWrapper() : const HomePage(),
+      // 🚀 ALWAYS start with SplashPage.
+      // SplashPage → StaffAuthWrapper → Dashboard (if logged in) or LoginPage (if not).
+      home: const SplashPage(),
 
       getPages: [
         // 🔑 AUTH FLOW
-        // Note: '/splash' in Staff App is Staff Splash.
-        // Since we start with HomePage (Role), we might not use '/splash' as initial route.
-        //  GetPage(name: '/splash', page: () => const SplashPage()),
+        GetPage(name: '/authWrapper', page: () => const StaffAuthWrapper()),
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/dashboard', page: () => const HomeDashboardPage()),
         GetPage(name: '/profile', page: () => const ProfilePage()),
 
         // 👨🏫 STAFF
         GetPage(name: '/staff', page: () => const StaffListPage()),
+        GetPage(name: '/addStaff', page: () => const AddStaffPage()),
+        GetPage(
+          name: '/staffBiometricLogs',
+          page: () => const StaffBiometricLogsPage(),
+        ),
+        GetPage(
+          name: '/takeStaffAttendance',
+          page: () => const TakeStaffAttendancePage(),
+        ),
         GetPage(
           name: '/staffAttendance',
           page: () => const StaffAttendancePage(),
@@ -125,6 +126,14 @@ class SsJcApp extends StatelessWidget {
           name: '/studentAttendance',
           page: () => const StudentAttendancePage(),
         ),
+        GetPage(
+          name: '/studentAttendanceFilter',
+          page: () => const StudentAttendanceFilterPage(),
+        ),
+        GetPage(
+          name: '/attendanceOptions',
+          page: () => const AttendanceOptionsPage(),
+        ),
 
         // 📚 EXAMS
         GetPage(
@@ -133,7 +142,7 @@ class SsJcApp extends StatelessWidget {
         ),
         GetPage(name: '/examsList', page: () => const ExamsListPage()),
         GetPage(
-          name: '/marksUpload',
+          name: '/subjectMarksUploadPage',
           page: () => const SubjectMarksUploadPage(),
         ),
 
@@ -153,6 +162,11 @@ class SsJcApp extends StatelessWidget {
           name: '/hostelAttendanceResult',
           page: () => const HostelAttendanceResultPage(),
         ),
+        GetPage(name: '/hostelList', page: () => const HostelListPage()),
+        GetPage(name: '/nonHostel', page: () => const NonHostelPage()),
+        GetPage(name: '/chat', page: () => const ChatPage()),
+        GetPage(name: '/communication', page: () => const CommunicationPage()),
+        GetPage(name: '/proAdmission', page: () => const ProAdmissionPage()),
       ],
     );
   }

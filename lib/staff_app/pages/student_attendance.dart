@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:student_app/staff_app/controllers/monthly_attendance_controller.dart';
 import 'package:student_app/staff_app/controllers/shift_controller.dart';
 import 'package:student_app/staff_app/get_student_pages/student_month_attendance_page.dart';
+import 'package:student_app/staff_app/controllers/main_controller.dart';
 
 import '../controllers/branch_controller.dart';
 import '../controllers/group_controller.dart';
@@ -23,8 +24,9 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   final CourseController courseCtrl = Get.put(CourseController());
   final BatchController batchCtrl = Get.put(BatchController());
   final ShiftController shiftCtrl = Get.put(ShiftController());
-  final MonthlyAttendanceController attendanceCtrl =
-      Get.put(MonthlyAttendanceController());
+  final MonthlyAttendanceController attendanceCtrl = Get.put(
+    MonthlyAttendanceController(),
+  );
 
   // ================= SELECTED VALUES =================
   String? branch;
@@ -50,8 +52,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     "December": "12",
   };
 
-  static const Color neon = Color(0xFF00FFF5);
-
   @override
   void initState() {
     super.initState();
@@ -75,304 +75,341 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         setState(() {});
       }
     });
+
+    Get.put(StaffMainController(), permanent: true).changeIndex(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryPurple = Color(0xFF7E49FF);
+    const lavenderBg = Color(0xFFE8EEFF);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF0b132b) : Colors.white,
-        elevation: 0,
-        title: Text(
-          "Student Attendance",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-
-      // ================= BODY =================
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xFF0b132b),
-                    Color(0xFF1c2541),
-                    Color(0xFF3a0ca3),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : const LinearGradient(
-                  colors: [
-                    Color(0xFFF5F6FA),
-                    Color(0xFFE8ECF4),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0f172a) : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                if (!isDark)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-              ],
-              border: isDark
-                  ? Border.all(color: Colors.white.withOpacity(0.15))
-                  : null,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ================= CUSTOM HEADER =================
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10,
+              bottom: 25,
+              left: 20,
+              right: 20,
             ),
-
-            // ✅ SINGLE SCROLL
-            child: ListView(
+            decoration: const BoxDecoration(
+              color: primaryPurple,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            child: Row(
               children: [
-                Text(
-                  "Select filters to view student attendance records",
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
-                Obx(() => _filterBox(
-                      context: context,
-                      label: "Select Branch",
-                      icon: Icons.school,
-                      iconColor: Colors.cyanAccent,
-                      value: branch,
-                      items:
-                          branchCtrl.branches.map((b) => b.branchName).toList(),
-                      onChanged: (v) {
-                        final b = branchCtrl.branches
-                            .firstWhere((e) => e.branchName == v);
-                        setState(() {
-                          branch = v;
-                          group = course = batch = shift = month = null;
-                          selectedMonthName = null;
-                        });
-                        groupCtrl.loadGroups(b.id);
-                        shiftCtrl.loadShifts(b.id);
-                      },
-                    )),
-                Obx(() => _filterBox(
-                      context: context,
-                      label: "Select Group",
-                      icon: Icons.groups,
-                      iconColor: Colors.pinkAccent,
-                      value: group,
-                      items: groupCtrl.groups.map((g) => g.name).toList(),
-                      onChanged: groupCtrl.groups.isEmpty
-                          ? null
-                          : (v) {
-                              final g = groupCtrl.groups
-                                  .firstWhere((e) => e.name == v);
+                const SizedBox(width: 15),
+                const Text(
+                  "Students Attendance",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Select filters to view students attendance\nrecords",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ================= FILTER CARD =================
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: lavenderBg,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Column(
+                      children: [
+                        Obx(
+                          () => _buildFilterField(
+                            label: "Branch",
+                            value: branch,
+                            items: branchCtrl.branches
+                                .map((b) => b.branchName)
+                                .toList(),
+                            onChanged: (v) {
+                              final b = branchCtrl.branches.firstWhere(
+                                (e) => e.branchName == v,
+                              );
+                              setState(() {
+                                branch = v;
+                                group = course = batch = shift = month = null;
+                                selectedMonthName = null;
+                              });
+                              groupCtrl.loadGroups(b.id);
+                              shiftCtrl.loadShifts(b.id);
+                            },
+                          ),
+                        ),
+                        Obx(
+                          () => _buildFilterField(
+                            label: "Group",
+                            value: group,
+                            items: groupCtrl.groups.map((g) => g.name).toList(),
+                            onChanged: (v) {
+                              final g = groupCtrl.groups.firstWhere(
+                                (e) => e.name == v,
+                              );
                               setState(() {
                                 group = v;
                                 course = batch = null;
                               });
                               courseCtrl.loadCourses(g.id);
                             },
-                    )),
-                Obx(() => _filterBox(
-                      context: context,
-                      label: "Select Course",
-                      icon: Icons.menu_book,
-                      iconColor: Colors.blueAccent,
-                      value: course,
-                      items:
-                          courseCtrl.courses.map((c) => c.courseName).toList(),
-                      onChanged: courseCtrl.courses.isEmpty
-                          ? null
-                          : (v) {
-                              final c = courseCtrl.courses
-                                  .firstWhere((e) => e.courseName == v);
+                          ),
+                        ),
+                        Obx(
+                          () => _buildFilterField(
+                            label: "Course",
+                            value: course,
+                            items: courseCtrl.courses
+                                .map((c) => c.courseName)
+                                .toList(),
+                            onChanged: (v) {
+                              final c = courseCtrl.courses.firstWhere(
+                                (e) => e.courseName == v,
+                              );
                               setState(() {
                                 course = v;
                                 batch = null;
                               });
                               batchCtrl.loadBatches(c.id);
                             },
-                    )),
-                Obx(() => _filterBox(
-                      context: context,
-                      label: "Select Batch",
-                      icon: Icons.group_work,
-                      iconColor: Colors.orangeAccent,
-                      value: batch,
-                      items: batchCtrl.batches.map((b) => b.batchName).toList(),
-                      onChanged: batchCtrl.batches.isEmpty
-                          ? null
-                          : (v) => setState(() => batch = v),
-                    )),
-                Obx(() => _filterBox(
-                      context: context,
-                      label: "Select Shift",
-                      icon: Icons.schedule,
-                      iconColor: Colors.lightGreenAccent,
-                      value: shift,
-                      items: shiftCtrl.shifts.map((s) => s.shiftName).toList(),
-                      onChanged: shiftCtrl.shifts.isEmpty
-                          ? null
-                          : (v) => setState(() => shift = v),
-                    )),
-                _filterBox(
-                  context: context,
-                  label: "Select Month",
-                  icon: Icons.date_range,
-                  iconColor: Colors.pinkAccent,
-                  value: selectedMonthName,
-                  items: monthMap.keys.toList(),
-                  onChanged: (v) => setState(() {
-                    selectedMonthName = v;
-                    month = monthMap[v!];
-                  }),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: neon,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () async {
-                      if ([branch, group, course, batch, shift, month]
-                          .contains(null)) {
-                        Get.snackbar("Error", "Please select all filters");
-                        return;
-                      }
+                          ),
+                        ),
+                        Obx(
+                          () => _buildFilterField(
+                            label: "Batch",
+                            value: batch,
+                            items: batchCtrl.batches
+                                .map((b) => b.batchName)
+                                .toList(),
+                            onChanged: (v) => setState(() => batch = v),
+                          ),
+                        ),
+                        Obx(
+                          () => _buildFilterField(
+                            label: "Shift",
+                            value: shift,
+                            items: shiftCtrl.shifts
+                                .map((s) => s.shiftName)
+                                .toList(),
+                            onChanged: (v) => setState(() => shift = v),
+                          ),
+                        ),
+                        _buildFilterField(
+                          label: "Month",
+                          value: selectedMonthName,
+                          items: monthMap.keys.toList(),
+                          onChanged: (v) => setState(() {
+                            selectedMonthName = v;
+                            month = monthMap[v!];
+                          }),
+                        ),
+                        const SizedBox(height: 10),
 
-                      await attendanceCtrl.loadAttendance(
-                        branchId: branchCtrl.branches
-                            .firstWhere((e) => e.branchName == branch!)
-                            .id,
-                        groupId: groupCtrl.groups
-                            .firstWhere((e) => e.name == group!)
-                            .id,
-                        courseId: courseCtrl.courses
-                            .firstWhere((e) => e.courseName == course!)
-                            .id,
-                        batchId: batchCtrl.batches
-                            .firstWhere((e) => e.batchName == batch!)
-                            .id,
-                        shiftId: shiftCtrl.shifts
-                            .firstWhere((e) => e.shiftName == shift!)
-                            .id,
-                        month: month!,
-                      );
+                        // ================= GET STUDENTS BUTTON =================
+                        Obx(
+                          () => Container(
+                            width: double.infinity,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF818CFF), Color(0xFFCE93F9)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: (attendanceCtrl.isLoading.value)
+                                  ? null
+                                  : () async {
+                                      if ([
+                                        branch,
+                                        group,
+                                        course,
+                                        batch,
+                                        shift,
+                                        month,
+                                      ].contains(null)) {
+                                        Get.snackbar(
+                                          "Error",
+                                          "Please select all filters",
+                                        );
+                                        return;
+                                      }
+                                      await attendanceCtrl.loadAttendance(
+                                        branchId: branchCtrl.branches
+                                            .firstWhere(
+                                              (e) => e.branchName == branch!,
+                                            )
+                                            .id,
+                                        groupId: groupCtrl.groups
+                                            .firstWhere((e) => e.name == group!)
+                                            .id,
+                                        courseId: courseCtrl.courses
+                                            .firstWhere(
+                                              (e) => e.courseName == course!,
+                                            )
+                                            .id,
+                                        batchId: batchCtrl.batches
+                                            .firstWhere(
+                                              (e) => e.batchName == batch!,
+                                            )
+                                            .id,
+                                        shiftId: shiftCtrl.shifts
+                                            .firstWhere(
+                                              (e) => e.shiftName == shift!,
+                                            )
+                                            .id,
+                                        month: month!,
+                                      );
 
-                      Get.to(() => StudentMonthAttendancePage(
-                            studentName: "Students",
-                            monthName: selectedMonthName!,
-                            year: DateTime.now().year,
-                            admNo: '',
-                          ));
-                    },
-                    child: const Text(
-                      "Get Students",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      Get.to(
+                                        () => StudentMonthAttendancePage(
+                                          studentName: "Students",
+                                          monthName: selectedMonthName!,
+                                          year: DateTime.now().year,
+                                          admNo: '',
+                                        ),
+                                      );
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: attendanceCtrl.isLoading.value
+                                  ? const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        Text(
+                                          "Get Students",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    "2025 © SSJC.",
-                    style: TextStyle(
-                        color: isDark ? Colors.white60 : Colors.black54,
-                        fontSize: 12),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _filterBox({
-    required BuildContext context,
+  Widget _buildFilterField({
     required String label,
-    required IconData icon,
-    required Color iconColor,
     required String? value,
     required List<String> items,
     required Function(String?)? onChanged,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        gradient: isDark
-            ? const LinearGradient(
-                colors: [
-                  Color(0xFF0b132b),
-                  Color(0xFF1c3faa),
-                  Color(0xFF6a2dbf),
-                ],
-              )
-            : null,
-        color: isDark ? null : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.35)
-              : Theme.of(context).dividerColor,
-        ),
-      ),
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: iconColor),
-          const SizedBox(width: 16),
-          Expanded(
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: value,
                 hint: Text(
-                  label,
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
+                  "Select $label",
+                  style: const TextStyle(color: Colors.black54, fontSize: 13),
                 ),
                 isExpanded: true,
-                dropdownColor: isDark ? const Color(0xFF0b132b) : Colors.white,
-                icon: Icon(
+                icon: const Icon(
                   Icons.keyboard_arrow_down,
-                  color: isDark ? neon : Colors.black54,
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
+                  color: Colors.black54,
                 ),
                 items: items
                     .map(
-                      (e) => DropdownMenuItem<String>(
+                      (e) => DropdownMenuItem(
                         value: e,
-                        child: Text(e),
+                        child: Text(
+                          e,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
+                          ),
+                        ),
                       ),
                     )
                     .toList(),

@@ -19,245 +19,176 @@ class _AddHostelPageState extends State<AddHostelPage> {
   String? _branch;
   String? _status;
 
-  // ---------------- COLORS ----------------
-  static const Color dark1 = Color(0xFF1a1a2e);
-  static const Color dark2 = Color(0xFF16213e);
-  static const Color dark3 = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-  static const Color neon = Color(0xFF00FFF5);
-
-  final Map<String, IconData> genderIcons = {
-    "Boys": Icons.male,
-    "Girls": Icons.female,
-  };
-
-  final Map<String, IconData> branchIcons = {
-    "EAMCET": Icons.engineering,
-    "NEET": Icons.local_hospital,
-  };
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      extendBodyBehindAppBar: true,
-
-      // ================= APP BAR =================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-            size: 26,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          "Add Hostel",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-
-      // ================= BODY =================
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [dark1, dark2, dark3, purpleDark],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).scaffoldBackgroundColor,
-                    Theme.of(context).colorScheme.surface,
-                  ],
-                ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-            child: Column(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ================= CUSTOM HEADER =================
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10,
+              bottom: 25,
+              left: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: primaryPurple,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(35),
+                bottomRight: Radius.circular(35),
+              ),
+            ),
+            child: Row(
               children: [
-                const SizedBox(height: 20),
-
-                // ================= FORM CARD =================
-                Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.05)
-                        : Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(26),
-                    border: Border.all(
-                      color: isDark ? neon : Theme.of(context).dividerColor,
-                      width: 1.2,
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark ? neon.withOpacity(0.35) : Colors.black12,
-                        blurRadius: 20,
-                      ),
-                    ],
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        _inputField(
-                          context,
-                          label: "Building Name *",
-                          controller: _buildingCtrl,
-                          icon: Icons.home_work,
-                        ),
-                        const SizedBox(height: 20),
-
-                        _dropdownField(
-                          context,
-                          label: "Category",
-                          value: _category,
-                          icon: Icons.male,
-                          items: const ["Boys", "Girls"],
-                          innerIcons: genderIcons,
-                          onChanged: (v) => setState(() => _category = v),
-                        ),
-                        const SizedBox(height: 20),
-
-                        _inputField(
-                          context,
-                          label: "Address *",
-                          controller: _addressCtrl,
-                          icon: Icons.location_on,
-                        ),
-                        const SizedBox(height: 20),
-
-                        _dropdownField(
-                          context,
-                          label: "Incharge *",
-                          value: _incharge,
-                          icon: Icons.person,
-                          items: const ["Staff1", "Staff2"],
-                          onChanged: (v) => setState(() => _incharge = v),
-                        ),
-                        const SizedBox(height: 20),
-
-                        _dropdownField(
-                          context,
-                          label: "Branch *",
-                          value: _branch,
-                          icon: Icons.account_tree,
-                          items: const ["EAMCET", "NEET"],
-                          innerIcons: branchIcons,
-                          onChanged: (v) => setState(() => _branch = v),
-                        ),
-                        const SizedBox(height: 20),
-
-                        _dropdownField(
-                          context,
-                          label: "Status",
-                          value: _status,
-                          icon: Icons.toggle_on,
-                          items: const ["Active", "Inactive"],
-                          onChanged: (v) => setState(() => _status = v),
-                        ),
-                        const SizedBox(height: 30),
-
-                        // ================= SUBMIT BUTTON =================
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.check_circle),
-                            label: const Text(
-                              "Add Hostel",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: neon,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              elevation: 15,
-                            ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content:
-                                        Text('Hostel added (dummy action)'),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  "Add Hostel",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
 
-  // ================= INPUT FIELD =================
-  Widget _inputField(
-    BuildContext context, {
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.06)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white24 : Theme.of(context).dividerColor,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: neon, size: 22),
-          const SizedBox(width: 12),
           Expanded(
-            child: TextFormField(
-              controller: controller,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black,
-                fontSize: 16,
-              ),
-              decoration: InputDecoration(
-                labelText: label,
-                labelStyle: TextStyle(
-                  color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-                  fontSize: 14,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // ================= FORM CONTAINER =================
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: lavenderBg.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel("Building Name *"),
+                          _buildTextField(
+                            hint: "Enter Building Name",
+                            controller: _buildingCtrl,
+                          ),
+
+                          _buildLabel("Category"),
+                          _buildDropdown(
+                            hint: "Select Category",
+                            value: _category,
+                            items: const ["BOYS HOSTEL", "GIRLS HOSTEL"],
+                            onChanged: (v) => setState(() => _category = v),
+                          ),
+
+                          _buildLabel("Address *"),
+                          _buildTextField(
+                            hint: "Enter Address",
+                            controller: _addressCtrl,
+                          ),
+
+                          _buildLabel("Incharge *"),
+                          _buildDropdown(
+                            hint: "Select Incharge",
+                            value: _incharge,
+                            items: const ["Staff1", "Staff2"],
+                            onChanged: (v) => setState(() => _incharge = v),
+                          ),
+
+                          _buildLabel("Branch *"),
+                          _buildDropdown(
+                            hint: "Select Branch",
+                            value: _branch,
+                            items: const ["EAMCET", "NEET"],
+                            onChanged: (v) => setState(() => _branch = v),
+                          ),
+
+                          _buildLabel("Status"),
+                          _buildDropdown(
+                            hint: "Select Status",
+                            value: _status,
+                            items: const ["Active", "Inactive"],
+                            onChanged: (v) => setState(() => _status = v),
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          // ================= ADD HOSTEL BUTTON =================
+                          Container(
+                            width: double.infinity,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF7C69FF), Color(0xFFD38DFA)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  // Implementation for adding hostel
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Add Hostel",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                border: InputBorder.none,
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
             ),
           ),
         ],
@@ -265,56 +196,74 @@ class _AddHostelPageState extends State<AddHostelPage> {
     );
   }
 
-  // ================= DROPDOWN FIELD =================
-  Widget _dropdownField(
-    BuildContext context, {
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?) onChanged,
-    required IconData icon,
-    Map<String, IconData>? innerIcons,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.06)
-            : Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white24 : Theme.of(context).dividerColor,
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String hint,
+    required TextEditingController controller,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: TextFormField(
+        controller: controller,
+        style: const TextStyle(fontSize: 14, color: Colors.black87),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          border: InputBorder.none,
+        ),
+        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required void Function(String?)? onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButtonFormField<String>(
+        child: DropdownButton<String>(
+          isExpanded: true,
           value: value,
-          dropdownColor: isDark ? dark3 : Theme.of(context).cardColor,
-          decoration: const InputDecoration(border: InputBorder.none),
-          icon: const Icon(Icons.arrow_drop_down, color: neon),
           hint: Text(
-            label,
-            style: TextStyle(
-              color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-              fontSize: 14,
-            ),
+            hint,
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
           ),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
           items: items.map((e) {
             return DropdownMenuItem(
               value: e,
-              child: Row(
-                children: [
-                  Icon(innerIcons?[e] ?? icon, color: neon, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    e,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                  ),
-                ],
+              child: Text(
+                e,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             );
           }).toList(),

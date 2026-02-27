@@ -3,7 +3,6 @@ import 'package:student_app/staff_app/api/api_collection.dart';
 import 'package:student_app/staff_app/api/api_service.dart';
 import 'package:student_app/staff_app/model/branch_model.dart';
 
-
 class BranchController extends GetxController {
   final RxList<BranchModel> branches = <BranchModel>[].obs;
   final RxBool isLoading = false.obs;

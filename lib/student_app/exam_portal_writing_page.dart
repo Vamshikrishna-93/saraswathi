@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:student_app/student_app/model/exam_item.dart';
 import 'package:student_app/student_app/widgets/exam_app_bar.dart';
 import 'package:student_app/student_app/widgets/exam_footer.dart';
@@ -476,6 +476,18 @@ class _ExamPortalWritingPageState extends State<ExamPortalWritingPage>
                   final double screenWidth = constraints.maxWidth;
                   final double screenHeight = constraints.maxHeight;
                   final bool isSmallScreen = screenHeight < 600;
+                  final List<String> options = [];
+                  final List<String> optionIds = [];
+                  if (_questions.isNotEmpty) {
+                    final currentQuestion = _questions[_currentIndex];
+                    for (int i = 1; i <= 6; i++) {
+                      final opt = currentQuestion['option$i'];
+                      if (opt != null && opt.toString().isNotEmpty) {
+                        options.add(opt.toString());
+                        optionIds.add('option$i');
+                      }
+                    }
+                  }
 
                   return Column(
                     children: [
@@ -508,16 +520,8 @@ class _ExamPortalWritingPageState extends State<ExamPortalWritingPage>
                               if (_questions.isNotEmpty)
                                 ExamOptionsList(
                                   isDark: isDark,
-                                  options: [
-                                    for (int i = 1; i <= 6; i++)
-                                      if (_questions[_currentIndex]['option$i'] !=
-                                              null &&
-                                          _questions[_currentIndex]['option$i']
-                                              .toString()
-                                              .isNotEmpty)
-                                        _questions[_currentIndex]['option$i']
-                                            .toString(),
-                                  ],
+                                  options: options,
+                                  optionIds: optionIds,
                                   selectedOptionId: _answers[_currentIndex],
                                   onOptionSelected: (optionId) {
                                     setState(() {

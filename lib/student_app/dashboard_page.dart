@@ -294,6 +294,7 @@ class _DashboardPageState extends State<DashboardPage> {
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Theme.of(context).dividerColor),
                 boxShadow: [
                   BoxShadow(
                     color: Theme.of(context).brightness == Brightness.dark
@@ -584,9 +585,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade700,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -1022,7 +1021,7 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),

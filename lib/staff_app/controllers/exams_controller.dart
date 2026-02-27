@@ -6,6 +6,7 @@ class ExamsController extends GetxController {
   RxBool isLoading = false.obs;
   RxList<ExamModel> exams = <ExamModel>[].obs;
   RxString query = ''.obs;
+  RxString selectedCategory = 'All'.obs;
 
   @override
   void onInit() {
@@ -26,7 +27,7 @@ class ExamsController extends GetxController {
 
       if (response is List) {
         // API returns list directly
-        list = response as List;
+        list = response;
       } else if (response['indexdata'] != null) {
         list = response['indexdata'];
       } else if (response['data'] != null) {
@@ -50,16 +51,22 @@ class ExamsController extends GetxController {
     }
   }
 
-  // 🔍 SEARCH FILTER
+  // 🔍 SEARCH & CATEGORY FILTER
   List<ExamModel> get filteredExams {
-    if (query.value.isEmpty) return exams;
-
     final q = query.value.toLowerCase();
+    final cat = selectedCategory.value;
 
     return exams.where((e) {
-      return e.examName.toLowerCase().contains(q) ||
+      final matchesSearch =
+          q.isEmpty ||
+          e.examName.toLowerCase().contains(q) ||
           e.category.toLowerCase().contains(q) ||
           e.branchName.toLowerCase().contains(q);
+
+      final matchesCategory =
+          cat == 'All' || e.category.toUpperCase() == cat.toUpperCase();
+
+      return matchesSearch && matchesCategory;
     }).toList();
   }
 }

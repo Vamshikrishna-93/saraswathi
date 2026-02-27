@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:student_app/staff_app/controllers/auth_controller.dart';
-import 'package:student_app/staff_app/controllers/profile_controller.dart';
-import 'package:student_app/staff_app/controllers/theme_controller.dart';
+import '../controllers/profile_controller.dart';
+import '../controllers/main_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../widgets/staff_bottom_nav_bar.dart';
 import 'package:student_app/staff_app/pages/profile_page.dart';
-import 'package:student_app/staff_app/utils/get_storage.dart';
 
 class HomeDashboardPage extends StatefulWidget {
   const HomeDashboardPage({super.key});
@@ -14,9 +14,17 @@ class HomeDashboardPage extends StatefulWidget {
 }
 
 class _HomeDashboardPageState extends State<HomeDashboardPage> {
-  bool showSearch = false;
-  bool isGridMenuOpen = false;
+  late ProfileController profileCtrl;
   String selectedYear = "2025-2026";
+
+  @override
+  void initState() {
+    super.initState();
+    profileCtrl = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController(), permanent: true);
+    Get.put(StaffMainController(), permanent: true).changeIndex(0);
+  }
 
   final List<String> years = [
     "2023-2024",
@@ -35,162 +43,157 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     {"name": "AVP", "present": 65, "absent": 35},
     {"name": "Tallur", "present": 75, "absent": 25},
   ];
-  final themeCtrl = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? const [
-                  Color(0xFF1a1a2e),
-                  Color(0xFF16213e),
-                  Color(0xFF0f3460),
-                  Color(0xFF533483),
-                ]
-              : const [Color(0xFFF5F6FA), Color(0xFFE8ECF4)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      drawer: _buildDrawer(),
+      appBar: _buildAppBar(context),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF8B5CF6), // Primary Purple
+              Color(0xFFC084FC), // Lighter Purple
+              Colors.white, // Bottom White
+            ],
+            stops: [0.0, 0.3, 0.7],
+          ),
         ),
+        child: _buildDashboardBody(),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        drawer: _buildDrawer(),
-        appBar: _buildAppBar(context),
-        body: _buildDashboardBody(),
-      ),
+      bottomNavigationBar: const StaffBottomNavBar(),
     );
   }
 
   // ================= APP BAR =================
 
   AppBar _buildAppBar(BuildContext context) {
-    final iconColor = Theme.of(context).iconTheme.color;
-
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      toolbarHeight: 64, // ✅ better height
       automaticallyImplyLeading: false,
-      titleSpacing: 12, // ✅ spacing from left
-
-      title: Row(
-        children: [
-          // LOGO
-          const CircleAvatar(
-            radius: 18,
-            backgroundImage: AssetImage("assets/ssjc.jpg"),
-          ),
-
-          const SizedBox(width: 10),
-
-          // MENU
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.menu, color: iconColor),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
+      leading: Builder(
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.short_text_rounded, color: Colors.black87),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
-
-          const SizedBox(width: 6),
-
-          // GRID
-          IconButton(
-            icon: Icon(Icons.grid_view_rounded, color: iconColor),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: toggleGridMenu,
-          ),
-
-          const SizedBox(width: 8),
-
-          // YEAR DROPDOWN (RESPONSIVE)
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: selectedYear,
-                  isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  dropdownColor: Theme.of(context).cardColor,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  items: years
-                      .map(
-                        (y) => DropdownMenuItem(
-                          value: y,
-                          child: Text(y, overflow: TextOverflow.ellipsis),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) => setState(() => selectedYear = v!),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
-
       actions: [
-        // 🌙 THEME TOGGLE
-        Obx(
-          () => IconButton(
-            tooltip: themeCtrl.isDark.value ? "Light Mode" : "Dark Mode",
-            icon: Icon(
-              themeCtrl.isDark.value
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-              color: iconColor,
+        IconButton(
+          icon: const Icon(Icons.search, color: Colors.white),
+          onPressed: () {},
+        ),
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {},
             ),
-            onPressed: themeCtrl.toggleTheme,
-          ),
+            Positioned(
+              right: 12,
+              top: 12,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
+              ),
+            ),
+          ],
         ),
         PopupMenuButton<String>(
           offset: const Offset(0, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 8,
           onSelected: (v) async {
             switch (v) {
               case 'profile':
-                // 👉 Open Profile Page
                 Get.to(() => const ProfilePage());
                 break;
               case 'logout':
-                // 🔥 Clear stored user session
-                AppStorage.clear();
-
-                // ✅ Delete ONLY user-based controllers
-                if (Get.isRegistered<AuthController>()) {
-                  Get.delete<AuthController>(force: true);
-                }
-
-                if (Get.isRegistered<ProfileController>()) {
-                  Get.delete<ProfileController>(force: true);
-                }
-
-                // 🚪 Clear navigation stack & go to login
-                Get.offAllNamed('/login');
+                Get.find<AuthController>().logout();
                 break;
             }
           },
           itemBuilder: (_) => const [
-            PopupMenuItem(value: 'profile', child: Text("Profile")),
-            PopupMenuItem(value: 'logout', child: Text("Logout")),
+            PopupMenuItem(
+              value: 'profile',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person_outline_rounded,
+                    size: 20,
+                    color: Color(0xFF8B5CF6),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "Profile",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  Icon(Icons.logout_rounded, size: 20, color: Colors.redAccent),
+                  SizedBox(width: 10),
+                  Text(
+                    "Logout",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
           child: Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: Theme.of(context).cardColor,
-              child: Icon(Icons.person),
-            ),
+            child: Obx(() {
+              final p = profileCtrl.profile.value;
+              final avatar = p?.avatar ?? "";
+              final bool hasValidAvatar =
+                  avatar.isNotEmpty && avatar != "avatar.png";
+
+              return CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.white30,
+                backgroundImage: hasValidAvatar
+                    ? NetworkImage(
+                        "https://dev.srisaraswathigroups.in/uploads/$avatar",
+                      )
+                    : null,
+                child: !hasValidAvatar
+                    ? const Icon(Icons.person, color: Colors.white, size: 20)
+                    : null,
+              );
+            }),
           ),
         ),
       ],
@@ -206,108 +209,196 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            smallCard("Total Students", "6902", [
-              Color(0xFF4ade80),
-              Color(0xFF22c55e),
-            ], Icons.people_outline),
-
-            const SizedBox(height: 12),
-
-            smallCard("Day", "2047", [
-              Color(0xFF818cf8),
-              Color(0xFF6366f1),
-            ], Icons.directions_bus_outlined),
-
-            const SizedBox(height: 12),
-
-            smallCard("Hostel", "4854", [
-              Color(0xFFfbbf24),
-              Color(0xFFf59e0b),
-            ], Icons.apartment_outlined),
-
-            const SizedBox(height: 12),
-
-            smallCard("Today's Outing", "14", [
-              Color(0xFF51dbe2),
-              Color(0xFF1cdbE5),
-            ], Icons.person_outline),
-
-            const SizedBox(height: 12),
-
-            smallCard("Today Present", "4130", [
-              Color(0xFF4ade80),
-              Color(0xFF22c55e),
-            ], Icons.people_outline),
-
-            const SizedBox(height: 12),
-
-            smallCard("Today Absent", "772", [
-              Color(0xFFf87171),
-              Color(0xFFef4444),
-            ], Icons.person_off_outlined),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [Colors.white, Color(0xFFE0E7FF)],
+                  ).createShader(bounds),
+                  child: const Text(
+                    "Dashboard",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (v) => setState(() => selectedYear = v),
+                  itemBuilder: (context) => years
+                      .map((y) => PopupMenuItem(value: y, child: Text(y)))
+                      .toList(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          selectedYear,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 25),
 
-            Text(
-              "Student Attendance",
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              childAspectRatio: 1.7,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              children: [
+                _buildStatCard("Total Students", "6902", Icons.groups_rounded, [
+                  const Color(0xFF26C6DA),
+                  const Color(0xFF00ACC1),
+                ]),
+                _buildStatCard(
+                  "Day Scholars",
+                  "2,047",
+                  Icons.directions_bus_rounded,
+                  [const Color(0xFFF06292), const Color(0xFFD81B60)],
+                ),
+                _buildStatCard("Hostel", "4,854", Icons.business_rounded, [
+                  const Color(0xFFFFB74D),
+                  const Color(0xFFF57C00),
+                ]),
+                _buildStatCard(
+                  "Today's Outing",
+                  "14",
+                  Icons.person_pin_rounded,
+                  [const Color(0xFF38BDF8), const Color(0xFF0284C7)],
+                ),
+                _buildStatCard(
+                  "Today Present",
+                  "4,130",
+                  Icons.how_to_reg_rounded,
+                  [const Color(0xFF66BB6A), const Color(0xFF388E3C)],
+                ),
+                _buildStatCard(
+                  "Today Absent",
+                  "772",
+                  Icons.person_remove_rounded,
+                  [const Color(0xFFEC4899), const Color(0xFFD81B60)],
+                ),
+              ],
             ),
 
-            const SizedBox(height: 20),
-
-            // Attendance container
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white24),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF1a1a2e),
-                    Color(0xFF16213e),
-                    Color(0xFF0f3460),
-                    Color(0xFF533483),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            const SizedBox(height: 30),
+            const Text(
+              "Quick Actions",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 18),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              childAspectRatio: 1.45,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              children: [
+                _buildQuickAction(
+                  "Class Attendance",
+                  Icons.people_alt_rounded,
+                  const Color(0xFF26C6DA),
+                  () => Get.toNamed('/studentAttendanceFilter'),
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black45,
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  ),
-                ],
+                _buildQuickAction(
+                  "Hostel Attendance",
+                  Icons.calendar_month_rounded,
+                  const Color(0xFFFFA726),
+                  () => Get.toNamed('/hostelAttendanceFilter'),
+                ),
+                _buildQuickAction(
+                  "Issue Outing",
+                  Icons.backpack_rounded,
+                  const Color(0xFF42A5F5),
+                  () => Get.toNamed('/outingList'),
+                ),
+                _buildQuickAction(
+                  "Verify Outing",
+                  Icons.verified_rounded,
+                  const Color(0xFFEC4899),
+                  () => Get.toNamed('/outingPending'),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+            const Text(
+              "Students Attendance",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0E7FF).withOpacity(0.6),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
-                children: [
-                  for (var c in colleges)
-                    AttendanceItem(
-                      title: c["name"],
-                      present: c["present"],
-                      absent: c["absent"],
-                    ),
-                ],
+                children: colleges
+                    .map(
+                      (c) => _buildAttendanceBar(
+                        c["name"],
+                        c["present"],
+                        c["present"] >= 70
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFEF4444),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget smallCard(
+  Widget _buildStatCard(
     String title,
     String value,
-    List<Color> colors,
     IconData icon,
+    List<Color> colors,
   ) {
     return Container(
-      height: 85,
-      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: colors,
@@ -315,190 +406,83 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
-        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            bottom: -10,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 38),
             ),
-            Icon(icon, color: Colors.white, size: 40),
-          ],
-        ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  //  GRID MENU
-
-  void toggleGridMenu() {
-    if (isGridMenuOpen) {
-      Navigator.of(context).pop();
-      setState(() => isGridMenuOpen = false);
-    } else {
-      openGridMenu();
-    }
-  }
-
-  void _closeGridMenu() {
-    if (isGridMenuOpen) {
-      Navigator.of(context).pop();
-      setState(() => isGridMenuOpen = false);
-    }
-  }
-
-  void openGridMenu() {
-    setState(() => isGridMenuOpen = true);
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.black38,
-      barrierLabel: '',
-      transitionDuration: const Duration(milliseconds: 350),
-      pageBuilder: (_, __, ___) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              margin: const EdgeInsets.only(top: kToolbarHeight + 10),
-              height: MediaQuery.of(context).size.height * 0.85,
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(25),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        size: 28,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      onPressed: _closeGridMenu,
-                    ),
-                  ),
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.1,
-                      children: [
-                        _menuCard(
-                          color: const Color(0xFF2196F3),
-                          icon: Icons.groups_rounded,
-                          title: "Class Attendance",
-                          onTap: () => Get.toNamed('/classAttendance'),
-                          // ✅ correct route
-                        ),
-                        _menuCard(
-                          color: const Color(0xFFFFC107),
-                          icon: Icons.fact_check_rounded,
-                          title: "Hostel Attendance",
-                          onTap: () => Get.toNamed('/hostelAttendanceFilter'),
-                        ),
-                        _menuCard(
-                          color: const Color(0xFF4CAF50),
-                          icon: Icons.hiking,
-                          title: "Issue Outing",
-                          onTap: () => Get.toNamed('/outingList'),
-                        ),
-                        _menuCard(
-                          color: const Color(0xFFE53935),
-                          icon: Icons.verified_user_rounded,
-                          title: "Verify Outing",
-                          onTap: () => Get.toNamed('/outingPending'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (_, anim, __, child) {
-        return SlideTransition(
-          position: Tween(
-            begin: const Offset(0, -1),
-            end: Offset.zero,
-          ).animate(anim),
-          child: child,
-        );
-      },
-    ).then((_) {
-      setState(() => isGridMenuOpen = false);
-    });
-  }
-
-  //  MENU CARD
-
-  static Widget _menuCard({
-    required Color color,
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildQuickAction(
+    String title,
+    IconData icon,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
-              blurRadius: 10,
-              spreadRadius: 1,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
           ],
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 45),
-            const SizedBox(height: 10),
+            Icon(icon, color: iconColor, size: 36),
+            const SizedBox(height: 8),
             Text(
               title,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -506,256 +490,284 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     );
   }
 
-  //  DRAWER
-
-  Widget _buildDrawer() {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(40),
-        bottomRight: Radius.circular(40),
-      ),
-      child: Drawer(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                gradient: Theme.of(context).brightness == Brightness.dark
-                    ? const LinearGradient(
-                        colors: [Color(0xFF0f3460), Color(0xFF533483)],
-                      )
-                    : const LinearGradient(
-                        colors: [Color(0xFFE8ECF4), Color(0xFFF5F6FA)],
-                      ),
-              ),
-              child: Center(
-                child: Text(
-                  "Menu",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-
-            _drawerItem(
-              icon: Icons.chat_bubble_outline,
-              title: "Chat",
-              iconColor: Colors.cyanAccent,
-              onTap: () {},
-            ),
-
-            _drawerExpandable(
-              icon: Icons.calendar_today,
-              iconColor: Colors.blueAccent,
-              title: "Attendance",
-              children: [
-                _drawerSubItem(
-                  "Student Attendance",
-                  () => Get.toNamed('/studentAttendance'),
-                ),
-                _drawerSubItem(
-                  "Verify Attendance",
-                  () => Get.toNamed('/verifyAttendance'),
-                ),
-                _drawerSubItem("Outings", () => Get.toNamed('/outingList')),
-                _drawerSubItem(
-                  "Outings Pending",
-                  () => Get.toNamed('/outingPending'),
-                ),
-              ],
-            ),
-
-            _drawerExpandable(
-              icon: Icons.assignment_outlined,
-              iconColor: Colors.greenAccent,
-              title: "Exams",
-              children: [
-                _drawerSubItem(
-                  "Exam Category List",
-                  () => Get.toNamed('/examCategoryList'),
-                ),
-                _drawerSubItem("Exams List", () => Get.toNamed('/examsList')),
-                _drawerSubItem(
-                  "Student Marks Upload",
-                  () => Get.toNamed('/marksUpload'),
-                ),
-              ],
-            ),
-            // ================= FEES (NEW) =================
-            _drawerExpandable(
-              icon: Icons.currency_rupee,
-              iconColor: Colors.amberAccent,
-              title: "Fees",
-              children: [
-                _drawerSubItem("Fee Heads", () => Get.toNamed('/feeHeads')),
-                // _drawerSubItem(
-                //   "Student Fee Assignment",
-                //   () => Get.toNamed('/studentFeeAssign'),
-                // ),
-                // _drawerSubItem(
-                //   "Fee Collection",
-                //   () => Get.toNamed('/feeCollection'),
-                // ),
-                // _drawerSubItem("Fee Receipt", () => Get.toNamed('/feeReceipt')),
-                // _drawerSubItem(
-                //   "Pending Fees",
-                //   () => Get.toNamed('/pendingFees'),
-                // ),
-                // _drawerSubItem("Fee Reports", () => Get.toNamed('/feeReports')),
-              ],
-            ),
-
-            _drawerExpandable(
-              icon: Icons.apartment,
-              iconColor: Colors.orangeAccent,
-              title: "Hostel",
-              children: [
-                _drawerSubItem("Floors", () => Get.toNamed('/floors')),
-                _drawerSubItem("Rooms", () => Get.toNamed('/rooms')),
-                _drawerSubItem("Members", () => Get.toNamed('/hostelMembers')),
-                _drawerSubItem("Add Hostel", () => Get.toNamed('/addHostel')),
-              ],
-            ),
-
-            _drawerExpandable(
-              icon: Icons.groups_2_outlined,
-              iconColor: Colors.pinkAccent,
-              title: "HR Management",
-              children: [
-                _drawerSubItem("Staff", () => Get.toNamed('/staff')),
-                _drawerSubItem(
-                  "Staff Attendance",
-                  () => Get.toNamed('/staffAttendance'),
-                ),
-              ],
-            ),
-
-            _drawerItem(
-              icon: Icons.message_outlined,
-              title: "Communication",
-              iconColor: Colors.tealAccent,
-              onTap: () {},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _drawerItem({
-    required IconData icon,
-    required String title,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: iconColor),
-      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
-      onTap: onTap,
-    );
-  }
-
-  Widget _drawerExpandable({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required List<Widget> children,
-  }) {
-    return ExpansionTile(
-      collapsedIconColor: Theme.of(context).iconTheme.color,
-      iconColor: Theme.of(context).iconTheme.color,
-      leading: Icon(icon, color: iconColor),
-      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
-      children: children,
-    );
-  }
-
-  Widget _drawerSubItem(String title, VoidCallback onTap) {
-    return ListTile(
-      title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
-      onTap: onTap,
-    );
-  }
-}
-
-// ATTENDANCE
-
-class AttendanceItem extends StatelessWidget {
-  final String title;
-  final int present;
-  final int absent;
-
-  const AttendanceItem({
-    super.key,
-    required this.title,
-    required this.present,
-    required this.absent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildAttendanceBar(String label, int percentage, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              Text(
+                "$percentage%",
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Container(
-            height: 22,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              color: Colors.grey.shade300,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: present,
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF7A80FF),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(50),
-                        bottomLeft: Radius.circular(50),
-                      ),
-                    ),
-                    child: Text(
-                      "$present%",
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: absent,
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFF7A7A),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(50),
-                        bottomRight: Radius.circular(50),
-                      ),
-                    ),
-                    child: Text(
-                      "$absent%",
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: percentage / 100,
+              backgroundColor: Colors.white,
+              color: color,
+              minHeight: 10,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ================= DRAWER =================
+
+  Widget _buildDrawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: Container(
+        color: const Color(0xFFF5F3FF),
+        child: Column(
+          children: [
+            _buildDrawerHeader(),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 15,
+                ),
+                children: [
+                  _buildExpandableDrawerItem(
+                    icon: Icons.fact_check_rounded, // Exam Icon from image
+                    title: "Exams",
+                    children: [
+                      _buildDrawerSubItem(
+                        "Exam Category List",
+                        () => Get.toNamed('/examCategoryList'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Exams List",
+                        () => Get.toNamed('/examsList'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Student Marks Upload",
+                        () => Get.toNamed('/subjectMarksUploadPage'),
+                      ),
+                    ],
+                  ),
+                  _buildDrawerPillItem(
+                    icon: Icons.chat_bubble_rounded, // Chat Icon from image
+                    title: "Pro Admission",
+                    onTap: () => Get.toNamed('/proadmission'),
+                  ),
+                  _buildExpandableDrawerItem(
+                    icon: Icons.apartment_rounded, // Hostel Icon from image
+                    title: "Hostels",
+                    children: [
+                      _buildDrawerSubItem(
+                        "Hostel List",
+                        () => Get.toNamed('/hostelList'),
+                      ),
+                      _buildDrawerSubItem("Rooms", () => Get.toNamed('/rooms')),
+                      _buildDrawerSubItem(
+                        "Floors",
+                        () => Get.toNamed('/floors'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Members",
+                        () => Get.toNamed('/hostelMembers'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Add Hostel",
+                        () => Get.toNamed('/addHostel'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Non-Hostel Students",
+                        () => Get.toNamed('/nonHostel'),
+                      ),
+                    ],
+                  ),
+                  _buildExpandableDrawerItem(
+                    icon: Icons.manage_accounts_rounded, // Hr Icon from image
+                    title: "Hr Management",
+                    children: [
+                      _buildDrawerSubItem(
+                        "Staff List",
+                        () => Get.toNamed('/staff'),
+                      ),
+                      _buildDrawerSubItem(
+                        "Staff Attendance",
+                        () => Get.toNamed('/staffAttendance'),
+                      ),
+                    ],
+                  ),
+                  _buildDrawerPillItem(
+                    icon: Icons.chat_bubble_rounded, // Chat Icon from image
+                    title: "Chat",
+                    onTap: () => Get.toNamed('/chat'),
+                  ),
+                  _buildDrawerPillItem(
+                    icon: Icons.forum_rounded, // Communication Icon from image
+                    title: "Communication",
+                    onTap: () => Get.toNamed('/communication'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 20,
+        bottom: 30,
+        left: 20,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF8B5CF6), Color(0xFFC084FC)],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Logo Circle
+          Container(
+            width: 70,
+            height: 70,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text(
+                "Logo",
+                style: TextStyle(
+                  color: Color(0xFF8B5CF6),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // User Name
+          Obx(
+            () => Text(
+              profileCtrl.profile.value?.name ?? "Ashok Reddy",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          // User ID
+          const Text(
+            "User ID :  667021",
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerPillItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+        leading: Icon(icon, color: Colors.black, size: 22),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandableDrawerItem({
+    required IconData icon,
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+          leading: Icon(icon, color: Colors.black, size: 22),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          trailing: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Colors.black,
+            size: 22,
+          ),
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerSubItem(String title, VoidCallback onTap) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.only(left: 60, right: 20),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+          color: Colors.black54,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

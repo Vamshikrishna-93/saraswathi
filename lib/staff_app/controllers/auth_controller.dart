@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:get/state_manager.dart';
 import 'package:student_app/staff_app/utils/get_storage.dart';
 import '../api/api_service.dart';
 import 'profile_controller.dart';
@@ -33,18 +31,29 @@ class AuthController extends GetxController {
         // 🔐 SAVE SESSION
         AppStorage.saveToken(response["access_token"]);
         AppStorage.saveUserId(response["userid"]);
-
-        if (response["role"] != null) {
-          AppStorage.saveRole(response["role"]);
-        }
-        if (response["login_type"] != null) {
-          AppStorage.saveLoginType(response["login_type"]);
-        }
-        if (response["permissions"] != null) {
-          AppStorage.savePermissions(response["permissions"]);
-        }
-
         AppStorage.setLoggedIn(true);
+
+        // 🔥 SAVE MULTI-USER SESSION
+        AppStorage.saveUserSession({
+          'user_login': username,
+          'userid': response['userid'],
+          'login_type': response['login_type'],
+          'role': response['role'],
+          'permissions': response['permissions'],
+          // We don't have name/avatar yet, ProfileController will fetch them later
+        }, response["access_token"]);
+
+        // 🔥 FETCH PROFILE IMMEDIATELY AFTER LOGIN
+        // This ensures Dashboard/Drawer have user data right away
+        final profileController = Get.isRegistered<ProfileController>()
+            ? Get.find<ProfileController>()
+            : Get.put(ProfileController());
+
+        // Use await to ensure profile is fetched before moving to dashboard
+        // If it fails, we still go to dashboard but user info might be missing
+        profileController.fetchProfile().catchError((e) {
+          debugPrint("PROFILE FETCH FAILED AFTER LOGIN: $e");
+        });
 
         // 🚀 GO TO DASHBOARD
         Get.offAllNamed('/dashboard');
@@ -115,24 +124,15 @@ class AuthController extends GetxController {
 
   // ================= LOGOUT =================
   void logout() {
-    // 🔥 CLEAR PROFILE CONTROLLER (MULTI-USER SUPPORT)
+    // 🚀 1. Clear Session
+    AppStorage.clear();
+
+    // 🧹 2. Clear related controllers
     if (Get.isRegistered<ProfileController>()) {
       Get.delete<ProfileController>(force: true);
     }
 
-    // 🔥 CLEAR STORED USER SESSION
-    AppStorage.clear();
-
-    // ❌ DO NOT delete ThemeController
-    // ✅ Delete ONLY AuthController
-    if (Get.isRegistered<AuthController>()) {
-      Get.delete<AuthController>(force: true);
-    }
-
-    // 🔑 RE-REGISTER FOR NEXT USER
-    Get.lazyPut<AuthController>(() => AuthController());
-
-    // 🚪 BACK TO LOGIN
-    Get.offAllNamed('/login');
+    // 🚪 3. GO BACK TO LOGIN (via auth wrapper — session is cleared so it shows LoginPage)
+    Get.offAllNamed('/authWrapper');
   }
 }

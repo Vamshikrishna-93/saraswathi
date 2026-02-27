@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/search_field.dart';
+import 'package:get/get.dart';
+import 'assign_incharge_page.dart';
+import 'add_room_page.dart';
 
 class RoomsPage extends StatefulWidget {
   const RoomsPage({super.key});
@@ -10,315 +12,352 @@ class RoomsPage extends StatefulWidget {
 
 class _RoomsPageState extends State<RoomsPage> {
   String _query = '';
-  String _viewBy = 'Floor Wise';
 
-  // ================= DARK COLORS =================
-  static const Color dark1 = Color(0xFF1a1a2e);
-  static const Color dark2 = Color(0xFF16213e);
-  static const Color dark3 = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-  static const Color neon = Color(0xFF00FFF5);
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
+  static const Color cardPurple = Color(0xFF8A5CF5);
+  static const Color badgeBlue = Color(0xFFD7E5FF);
 
   // ROOM DATA
   final List<Map<String, String>> _rooms = [
-    {'room': '101', 'floor': 'Ground Floor', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'room': '102', 'floor': 'Ground Floor', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'room': '201', 'floor': 'First Floor', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'room': '202', 'floor': 'First Floor', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'room': '301', 'floor': 'Second Floor', 'hostel': 'SSG NEET & MAINS'},
+    {
+      'room': 'G3',
+      'category': 'Girls Hostel',
+      'phone': '91776162696',
+      'floor': 'Ground Floor',
+      'hostel': 'SSG EAMCET CAMPUS',
+      'branch': 'SSJC-SSG EAMCET CAMPUS',
+    },
+    {
+      'room': 'G3',
+      'category': 'Girls Hostel',
+      'phone': '91776162696',
+      'floor': 'Ground Floor',
+      'hostel': 'SSG EAMCET CAMPUS',
+      'branch': 'SSJC-SSG EAMCET CAMPUS',
+    },
+    {
+      'room': 'G3',
+      'category': 'Girls Hostel',
+      'phone': '91776162696',
+      'floor': 'Ground Floor',
+      'hostel': 'SSG EAMCET CAMPUS',
+      'branch': 'SSJC-SSG EAMCET CAMPUS',
+    },
+    {
+      'room': 'G3',
+      'category': 'Girls Hostel',
+      'phone': '91776162696',
+      'floor': 'Ground Floor',
+      'hostel': 'SSG EAMCET CAMPUS',
+      'branch': 'SSJC-SSG EAMCET CAMPUS',
+    },
   ];
-
-  // ================= FILTER SHEET =================
-  void _chooseViewBy() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        final options = ['Floor Wise', 'Hostel Wise', 'Room Wise'];
-
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: isDark
-                ? const LinearGradient(
-                    colors: [dark2, dark3],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )
-                : LinearGradient(
-                    colors: [
-                      Theme.of(context).cardColor,
-                      Theme.of(context).colorScheme.surface,
-                    ],
-                  ),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: options
-                .map(
-                  (o) => RadioListTile<String>(
-                    title: Text(
-                      o,
-                      style: TextStyle(
-                        color:
-                            isDark ? const Color(0xFFB5C7E8) : Colors.black87,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    activeColor: neon,
-                    value: o,
-                    groupValue: _viewBy,
-                    onChanged: (v) {
-                      setState(() => _viewBy = v!);
-                      Navigator.pop(context);
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final filtered = _rooms.where((r) {
-      return r['room']!.contains(_query) ||
-          r['floor']!.toLowerCase().contains(_query.toLowerCase()) ||
-          r['hostel']!.toLowerCase().contains(_query.toLowerCase());
+      final searchLower = _query.toLowerCase();
+      return r['room']!.toLowerCase().contains(searchLower) ||
+          r['floor']!.toLowerCase().contains(searchLower) ||
+          r['hostel']!.toLowerCase().contains(searchLower);
     }).toList();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ================= CUSTOM HEADER =================
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10,
+              bottom: 25,
+              left: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: primaryPurple,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(35),
+                bottomRight: Radius.circular(35),
+              ),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  "Rooms List",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-      // ================= APP BAR =================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Rooms List",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: _chooseViewBy,
-            icon:
-                Icon(Icons.filter_list, color: isDark ? neon : Colors.black54),
-            label: Text(
-              _viewBy,
-              style: TextStyle(
-                color: isDark ? neon : Colors.black54,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+          // ================= SEARCH BAR =================
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: primaryPurple.withOpacity(0.5)),
+              ),
+              child: TextField(
+                onChanged: (v) => setState(() => _query = v),
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.search, color: Colors.black54),
+                  hintText: "Search room / floor / hostel",
+                  hintStyle: TextStyle(color: Colors.black38, fontSize: 14),
+                  border: InputBorder.none,
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: lavenderBg.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: filtered.length,
+                itemBuilder: (context, i) => _roomCard(context, filtered[i]),
+              ),
+            ),
+          ),
+
+          // ================= BOTTOM BUTTONS =================
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _gradientButton(
+                    onTap: () => Get.to(() => const AssignInchargePage()),
+                    colors: [const Color(0xFFA590FF), const Color(0xFFD3A4FF)],
+                    icon: Icons.check_circle_outline,
+                    label: "Assign Incharge",
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: _gradientButton(
+                    onTap: () => Get.to(() => const AddRoomPage()),
+                    colors: [const Color(0xFF46B7B9), const Color(0xFF9BD471)],
+                    icon: Icons.add,
+                    label: "Add New Room",
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
+    );
+  }
 
-      // ================= BODY =================
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [dark1, dark2, dark3, purpleDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).scaffoldBackgroundColor,
-                    Theme.of(context).colorScheme.surface,
-                  ],
-                ),
-        ),
-        child: Column(
+  Widget _roomCard(BuildContext context, Map<String, String> data) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
           children: [
-            const SizedBox(height: 95),
-
-            // ================= SEARCH =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.12)
-                      : Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white24
-                        : Theme.of(context).dividerColor,
-                  ),
-                ),
-                child: SearchField(
-                  hint: 'Search room / floor / hostel',
-                  hintStyle: TextStyle(
-                    color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-                  ),
-                  textColor: isDark ? Colors.white : Colors.black,
-                  iconColor: isDark ? neon : Colors.black54,
-                  onChanged: (v) => setState(() => _query = v),
+            // Left Accent
+            Container(
+              width: 12,
+              decoration: const BoxDecoration(
+                color: Color(0xFF818CF8), // Specific purple from image
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(22),
+                  bottomLeft: Radius.circular(22),
                 ),
               ),
             ),
-
-            const SizedBox(height: 15),
-
-            // ================= ROOM LIST =================
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: filtered.length,
-                itemBuilder: (context, i) {
-                  final r = filtered[i];
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: isDark
-                          ? LinearGradient(
-                              colors: [
-                                dark3.withOpacity(0.45),
-                                purpleDark.withOpacity(0.45),
-                              ],
-                            )
-                          : LinearGradient(
-                              colors: [
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.08),
-                                Theme.of(context)
-                                    .colorScheme
-                                    .secondary
-                                    .withOpacity(0.08),
-                              ],
-                            ),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: isDark
-                            ? neon.withOpacity(0.35)
-                            : Theme.of(context).dividerColor,
-                        width: 1.3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              isDark ? neon.withOpacity(0.22) : Colors.black12,
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Room: ${r['room']}",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Floor: ${r['floor']}",
-                              style: TextStyle(
-                                color: isDark
-                                    ? const Color(0xFFB5C7E8)
-                                    : Colors.black54,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "Hostel: ${r['hostel']}",
-                              style: TextStyle(
-                                color: isDark
-                                    ? const Color(0xFFB5C7E8)
-                                    : Colors.black54,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // ROOM BADGE
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 8),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: neon,
-                            borderRadius: BorderRadius.circular(12),
+                            color: cardPurple,
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            r['room']!,
+                            data['room']!,
                             style: const TextStyle(
-                              color: Colors.black,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeBlue,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            data['category']!,
+                            style: const TextStyle(
+                              color: Color(0xFF5A7DC6),
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  );
-                },
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.phone,
+                          color: Color(0xFF5A7DC6),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          data['phone']!,
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1, thickness: 0.5),
+                    ),
+                    _infoRow("Floor", data['floor']!),
+                    const SizedBox(height: 6),
+                    _infoRow("Hostel", data['hostel']!),
+                    const SizedBox(height: 6),
+                    _infoRow("Branch", data['branch']!),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
 
-      // ================= FAB =================
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: isDark ? neon : Theme.of(context).colorScheme.primary,
-        icon: Icon(Icons.add, color: isDark ? Colors.black : Colors.white),
-        label: Text(
-          "Add Room",
-          style: TextStyle(
-            color: isDark ? Colors.black : Colors.white,
-            fontWeight: FontWeight.bold,
+  Widget _infoRow(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(color: Colors.black, fontSize: 14),
+        children: [
+          TextSpan(
+            text: "$label : ",
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          TextSpan(
+            text: value,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gradientButton({
+    required VoidCallback onTap,
+    required List<Color> colors,
+    required IconData icon,
+    required String label,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 55,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors),
+          borderRadius: BorderRadius.circular(15),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-        elevation: 12,
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Add Room (Dummy Action)")),
-          );
-        },
       ),
     );
   }

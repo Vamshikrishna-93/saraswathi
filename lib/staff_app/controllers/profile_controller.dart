@@ -1,48 +1,3 @@
-// import 'dart:convert';
-// import 'package:get/get.dart';
-// import 'package:get_storage/get_storage.dart';
-// import 'package:http/http.dart' as http;
-// import '../api/api_collection.dart';
-// import '../model/profile_model.dart';
-
-// class ProfileController extends GetxController {
-//   final box = GetStorage();
-
-//   var isLoading = true.obs;
-//   var profile = Rxn<ProfileModel>();
-
-//   @override
-//   void onInit() {
-//     fetchProfile();
-//     super.onInit();
-//   }
-
-//   Future<void> fetchProfile() async {
-//     try {
-//       isLoading(true);
-
-//       final token = box.read("token"); // saved after login
-
-//       final response = await http.get(
-//         Uri.parse(ApiCollection.baseUrlSsjc + ApiCollection.myProfile),
-//         headers: {
-//           "Authorization": "Bearer $token",
-//           "Accept": "application/json",
-//         },
-//       );
-
-//       if (response.statusCode == 200) {
-//         profile.value = ProfileModel.fromJson(jsonDecode(response.body));
-//       } else {
-//         Get.snackbar("Error", "Profile load failed");
-//       }
-//     } catch (e) {
-//       Get.snackbar("Error", e.toString());
-//     } finally {
-//       isLoading(false);
-//     }
-//   }
-// }
 import 'package:get/get.dart';
 import '../api/api_collection.dart';
 import '../api/api_service.dart';
@@ -53,6 +8,13 @@ class ProfileController extends GetxController {
   final isLoading = true.obs;
   final profile = Rxn<ProfileModel>();
   int? _currentUserId; // Track current user ID
+
+  // ================= BOTTOM NAV =================
+  final currentIndex = 0.obs;
+
+  void changeIndex(int index) {
+    currentIndex.value = index;
+  }
 
   @override
   void onInit() {
@@ -77,9 +39,7 @@ class ProfileController extends GetxController {
         _currentUserId = storedUserId;
       }
 
-      final response = await ApiService.getRequest(
-        ApiCollection.myProfile,
-      );
+      final response = await ApiService.getRequest(ApiCollection.myProfile);
 
       // API returns profile data directly (no success wrapper)
       // Check if response has success field for backward compatibility
@@ -97,11 +57,33 @@ class ProfileController extends GetxController {
         // No success field - response is the profile data directly
         profile.value = ProfileModel.fromJson(response);
       }
+
+      // 🔥 UPDATE SESSION WITH PROFILE DETAILS
+      if (profile.value != null && _currentUserId != null) {
+        final p = profile.value!;
+        final token = AppStorage.getToken();
+        if (token != null) {
+          final loginType = AppStorage.getLoginType();
+          final role = AppStorage.getUserRole();
+          final permissions = AppStorage.getPermissions();
+
+          AppStorage.saveUserSession({
+            'user_login': p.userLogin.isNotEmpty
+                ? p.userLogin
+                : _currentUserId.toString(),
+            'userid': _currentUserId,
+            'name': p.name,
+            'avatar': p.avatar,
+            'email': p.email,
+            'mobile': p.mobile,
+            'login_type': loginType,
+            'role': role,
+            'permissions': permissions,
+          }, token);
+        }
+      }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Profile fetch failed: ${e.toString()}",
-      );
+      Get.snackbar("Error", "Profile fetch failed: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }

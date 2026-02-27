@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HostelAttendancePage extends StatefulWidget {
   const HostelAttendancePage({super.key});
@@ -27,6 +28,7 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
   bool _isLoading = true;
   HostelAttendance? _attendanceData;
 
+  String branchName = "N/A";
   String hostelName = "VRB CAMPUS";
   String floor = "4-florr";
   String room = "408";
@@ -54,13 +56,23 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
   @override
   void initState() {
     super.initState();
+    _loadStoredUserData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchAttendance();
     });
-    // Refresh data every 5 minutes
+    // Refresh data every 3 minutes
     _refreshTimer = Timer.periodic(const Duration(minutes: 3), (_) {
       _fetchAttendance();
     });
+  }
+
+  Future<void> _loadStoredUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        branchName = prefs.getString('branch') ?? "N/A";
+      });
+    }
   }
 
   @override
@@ -455,6 +467,14 @@ class _HostelAttendancePageState extends State<HostelAttendancePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildHostelDetailRow(
+            Icons.domain_rounded,
+            const Color(0xFF6366F1),
+            'Branch',
+            branchName,
+            isMobile,
+          ),
+          SizedBox(height: isMobile ? 12 : 16),
           _buildHostelDetailRow(
             Icons.business,
             const Color(0xFF2563EB),

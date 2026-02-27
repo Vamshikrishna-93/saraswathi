@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ExamOptionsList extends StatelessWidget {
   final bool isDark;
   final List<String> options;
+  final List<String> optionIds;
   final String? selectedOptionId;
   final Function(String) onOptionSelected;
   final String Function(String) stripHtml;
@@ -11,6 +12,7 @@ class ExamOptionsList extends StatelessWidget {
     super.key,
     required this.isDark,
     required this.options,
+    required this.optionIds,
     required this.selectedOptionId,
     required this.onOptionSelected,
     required this.stripHtml,
@@ -20,7 +22,7 @@ class ExamOptionsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(options.length, (index) {
-        final optionId = (index + 1).toString();
+        final optionId = optionIds[index];
         final isSelected = selectedOptionId == optionId;
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -37,7 +39,7 @@ class ExamOptionsList extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withAlpha(7),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),

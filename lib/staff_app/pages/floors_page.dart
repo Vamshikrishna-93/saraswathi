@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../widgets/search_field.dart';
 import '../controllers/branch_controller.dart';
-import '../model/branch_model.dart';
+import 'add_floor_page.dart';
 
 class FloorsPage extends StatefulWidget {
   const FloorsPage({super.key});
@@ -14,23 +13,23 @@ class FloorsPage extends StatefulWidget {
 class _FloorsPageState extends State<FloorsPage> {
   String _query = '';
 
-  // ---------------- DARK COLORS ----------------
-  static const Color dark1 = Color(0xFF1a1a2e);
-  static const Color dark2 = Color(0xFF16213e);
-  static const Color dark3 = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-  static const Color neon = Color(0xFF00FFF5);
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
+  static const Color activeGreen = Color(0xFF78C991);
 
-  // ---------------- CONTROLLER ----------------
+  // ================= CONTROLLER =================
   final BranchController branchCtrl = Get.put(BranchController());
 
   int? selectedBranchId;
-  String selectedBranchName = "";
+  int? selectedHostelId;
 
+  // Mock Floor Data
   final List<Map<String, String>> _floors = [
-    {'floor': 'GROUND FLOOR', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'floor': 'FIRST FLOOR', 'hostel': 'SSG EAMCET CAMPUS'},
-    {'floor': 'SECOND FLOOR', 'hostel': 'SSG NEET & MAINS'},
+    {'floor': 'Second Floor', 'building_id': '7', 'branch_id': '24'},
+    {'floor': 'Third Floor', 'building_id': '7', 'branch_id': '24'},
+    {'floor': 'Fourth Floor', 'building_id': '7', 'branch_id': '24'},
+    {'floor': 'Fifth Floor', 'building_id': '7', 'branch_id': '24'},
   ];
 
   @override
@@ -41,249 +40,409 @@ class _FloorsPageState extends State<FloorsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Logic to check if filter is selected to show data or empty state
+    final bool showData = selectedBranchId != null && selectedHostelId != null;
 
     final filtered = _floors.where((f) {
-      return f['floor']!.toLowerCase().contains(_query.toLowerCase()) ||
-          f['hostel']!.toLowerCase().contains(_query.toLowerCase());
+      final q = _query.toLowerCase();
+      final floorName = f['floor'] ?? "";
+      return floorName.toLowerCase().contains(q);
     }).toList();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-
-      // ================= APP BAR =================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-            size: 26,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ================= CUSTOM HEADER =================
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10,
+              bottom: 25,
+              left: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: primaryPurple,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(35),
+                bottomRight: Radius.circular(35),
+              ),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                const Text(
+                  "Floor Management",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          "Floors List",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
 
-      // ================= BODY =================
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [dark1, dark2, dark3, purpleDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).scaffoldBackgroundColor,
-                    Theme.of(context).colorScheme.surface,
+          // ================= FILTERS =================
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+            child: Column(
+              children: [
+                _buildLabel("Branch"),
+                Obx(
+                  () => _buildDropdown(
+                    hint: "Select Branch",
+                    value: selectedBranchId,
+                    items: branchCtrl.branches
+                        .map((b) => {"id": b.id, "name": b.branchName})
+                        .toList(),
+                    onChanged: (val) => setState(() => selectedBranchId = val),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildLabel("Hostel"),
+                _buildDropdown(
+                  hint: "Select Hostel",
+                  value: selectedHostelId,
+                  items: [
+                    {"id": 1, "name": "SSG EAMCET CAMPUS"},
+                    {"id": 2, "name": "SSG NEET & MAINS"},
                   ],
+                  onChanged: (val) => setState(() => selectedHostelId = val),
                 ),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 95),
+              ],
+            ),
+          ),
 
-            // ================= SEARCH =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.12)
-                      : Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white24
-                        : Theme.of(context).dividerColor,
+          // ================= MAIN CONTAINER =================
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: lavenderBg.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: !showData
+                  ? _buildEmptyState()
+                  : Column(
+                      children: [
+                        // Search inside container
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: primaryPurple.withOpacity(0.3),
+                              ),
+                            ),
+                            child: TextField(
+                              onChanged: (v) => setState(() => _query = v),
+                              decoration: const InputDecoration(
+                                icon: Icon(
+                                  Icons.search,
+                                  color: Colors.black54,
+                                  size: 20,
+                                ),
+                                hintText: "Search Student or ID",
+                                hintStyle: TextStyle(
+                                  color: Colors.black38,
+                                  fontSize: 13,
+                                ),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 0,
+                            ),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, i) =>
+                                _floorCard(filtered[i], i),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+
+          // ================= BOTTOM BUTTON =================
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Container(
+              width: double.infinity,
+              height: 55,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF8A5CF5), Color(0xFFD3A4FF)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ElevatedButton.icon(
+                onPressed: () => Get.to(() => const AddFloorPage()),
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: const Text(
+                  "Add New Floor",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-                child: SearchField(
-                  hint: 'Search floor / hostel',
-                  hintStyle: TextStyle(
-                    color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  textColor: isDark ? Colors.white : Colors.black,
-                  iconColor: isDark ? neon : Colors.black54,
-                  onChanged: (v) => setState(() => _query = v),
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 12),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.network(
+            "https://cdni.iconscout.com/illustration/premium/thumb/searching-concept-illustration-download-in-svg-png-gif-file-formats--person-magnifying-glass-data-find-pack-business-illustrations-4712431.png",
+            height: 200,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.cloud_off, size: 80, color: Colors.grey),
+          ),
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              "Please select a branch to view categories",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black54,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // ================= BRANCH DROPDOWN =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() {
-                if (branchCtrl.isLoading.value) {
-                  return const CircularProgressIndicator();
-                }
-
-                if (branchCtrl.branches.isEmpty) {
-                  return Text(
-                    "No branches available",
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                  );
-                }
-
-                return DropdownButtonFormField<int>(
-                  value: selectedBranchId,
-                  dropdownColor: isDark ? dark1 : Theme.of(context).cardColor,
+  Widget _floorCard(Map<String, String> data, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                data['floor'] ?? "N/A",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: activeGreen.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  "Active",
                   style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.white.withOpacity(0.12)
-                        : Theme.of(context).cardColor,
-                    hintText: "Select Branch",
-                    hintStyle: TextStyle(
-                      color: isDark ? Colors.white60 : Colors.black54,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  items: branchCtrl.branches
-                      .map<DropdownMenuItem<int>>((BranchModel b) {
-                    return DropdownMenuItem<int>(
-                      value: b.id,
-                      child: Text(b.branchName),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBranchId = value;
-                      final selected =
-                          branchCtrl.branches.firstWhere((b) => b.id == value);
-                      selectedBranchName = selected.branchName;
-                    });
-                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 0.5),
+          const SizedBox(height: 12),
+          _infoRow("Hostel (Building ID)", data['building_id'] ?? "N/A"),
+          const SizedBox(height: 4),
+          _infoRow("Branch (Branch ID)", data['branch_id'] ?? "N/A"),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _circleIcon(Icons.edit, () {
+                Get.snackbar(
+                  "Info",
+                  "Edit floor: ${data['floor']}",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: primaryPurple.withOpacity(0.1),
                 );
               }),
-            ),
-
-            const SizedBox(height: 15),
-
-            // ================= FLOORS LIST =================
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: filtered.length,
-                itemBuilder: (context, i) {
-                  final item = filtered[i];
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: isDark
-                          ? LinearGradient(
-                              colors: [
-                                dark3.withOpacity(0.45),
-                                purpleDark.withOpacity(0.45),
-                              ],
-                            )
-                          : LinearGradient(
-                              colors: [
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withOpacity(0.08),
-                                Theme.of(context)
-                                    .colorScheme
-                                    .secondary
-                                    .withOpacity(0.08),
-                              ],
-                            ),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: isDark
-                            ? neon.withOpacity(0.32)
-                            : Theme.of(context).dividerColor,
-                        width: 1.3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              isDark ? neon.withOpacity(0.18) : Colors.black12,
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['floor']!,
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Hostel: ${item['hostel']}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? const Color(0xFFB5C7E8)
-                                : Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "Branch: ${selectedBranchName.isEmpty ? 'All Branches' : selectedBranchName}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? const Color(0xFFB5C7E8)
-                                : Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 10),
+              _circleIcon(Icons.delete, () {
+                _showDeleteDialog(index);
+              }),
+            ],
+          ),
+        ],
       ),
+    );
+  }
 
-      // ================= FAB =================
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: isDark ? neon : Theme.of(context).colorScheme.primary,
-        icon: Icon(Icons.add, color: isDark ? Colors.black : Colors.white),
-        label: Text(
-          "Add Floor",
-          style: TextStyle(
-            color: isDark ? Colors.black : Colors.white,
+  void _showDeleteDialog(int index) {
+    Get.defaultDialog(
+      title: "Delete Floor",
+      middleText: "Are you sure you want to delete this floor?",
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+      onConfirm: () {
+        setState(() {
+          _floors.removeAt(index);
+        });
+        Get.back();
+        Get.snackbar(
+          "Deleted",
+          "Floor removed successfully",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      },
+      onCancel: () {},
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(color: Colors.black, fontSize: 13),
+        children: [
+          TextSpan(
+            text: "$label : ",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(
+            text: value,
+            style: const TextStyle(color: Colors.black54),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _circleIcon(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: const BoxDecoration(
+          color: Color(0xFF8A5CF5),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 18),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5, left: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: RichText(
+          text: TextSpan(
+            text: text,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            children: const [
+              TextSpan(
+                text: " *",
+                style: TextStyle(color: Colors.red),
+              ),
+            ],
           ),
         ),
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Add Floor (Dummy Action)")),
-          );
-        },
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String hint,
+    required dynamic value,
+    required List<Map<String, dynamic>> items,
+    required void Function(dynamic) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black.withOpacity(0.1)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<dynamic>(
+          isExpanded: true,
+          value: value,
+          hint: Text(
+            hint,
+            style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          ),
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
+          items: items.map((item) {
+            return DropdownMenuItem<dynamic>(
+              value: item['id'],
+              child: Text(
+                item['name'],
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
       ),
     );
   }

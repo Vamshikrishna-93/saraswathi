@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:student_app/staff_app/controllers/profile_controller.dart';
+import 'package:student_app/staff_app/widgets/staff_bottom_nav_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-  // ✅ KEEP GRADIENTS HERE
   static const LinearGradient darkHeaderGradient = LinearGradient(
     colors: [
       Color(0xFF1a1a2e),
@@ -19,22 +18,10 @@ class ProfilePage extends StatefulWidget {
   );
 
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [
-      Color(0xFF0f3460),
-      Color(0xFF533483),
-    ],
+    colors: [Color(0xFF0f3460), Color(0xFF533483)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-
-  static const LinearGradient darkAppBarGradient = LinearGradient(
-    colors: [
-      Color(0xFF0f172a),
-      Color(0xFF111827),
-    ],
-  );
-
-  static const Color lightBackground = Color(0xFFF6F7FB);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -42,249 +29,346 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late final ProfileController controller;
+  int? selectedTabIndex; // Null means show menu
 
   @override
   void initState() {
     super.initState();
-    // Get or create ProfileController
     if (Get.isRegistered<ProfileController>()) {
       controller = Get.find<ProfileController>();
-      // Refresh profile to check if user changed (fetchProfile handles user change detection)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.fetchProfile();
-      });
     } else {
-      controller = Get.put(ProfileController());
+      controller = Get.put(ProfileController(), permanent: true);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchProfile();
+      controller.changeIndex(3);
+    });
   }
-
-  // ===== DARK GRADIENTS =====
-  static const LinearGradient darkHeaderGradient = LinearGradient(
-    colors: [
-      Color(0xFF1a1a2e),
-      Color(0xFF16213e),
-      Color(0xFF0f3460),
-      Color(0xFF533483),
-    ],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  // static const LinearGradient darkAppBarGradient = LinearGradient(
-  //   colors: [
-  //     Color(0xFF0f172a),
-  //     Color(0xFF111827),
-  //   ],
-  // );
-
-  static const Color lightBackground = Color(0xFFF6F7FB);
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return DefaultTabController(
-      length: 6,
-      child: Scaffold(
-        backgroundColor: isDark ? null : lightBackground,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Obx(() {
+        if (controller.isLoading.value || controller.profile.value == null) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF7E49FF)),
+          );
+        }
 
-        // ================= APP BAR =================
-        appBar: AppBar(
-          title: const Text("Profile"),
-          elevation: 0,
-          foregroundColor: isDark ? Colors.white : Colors.black,
-          backgroundColor: Colors.transparent,
-          flexibleSpace: isDark
-              ? Container(
-                  decoration: const BoxDecoration(
-                  gradient: ProfilePage.darkAppBarGradient,
-                ))
-              : null,
-        ),
+        final p = controller.profile.value!;
 
-        // ================= BODY =================
-        body: Column(
-          children: [
-            // ---------- PROFILE HEADER ----------
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: isDark ? darkHeaderGradient : null,
-                color: isDark ? null : Colors.white,
-              ),
-              child: Row(
+        // If a tab is selected, show the detail view
+        if (selectedTabIndex != null) {
+          return _buildDetailView(selectedTabIndex!, isDark);
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Obx(() {
-                    if (controller.isLoading.value ||
-                        controller.profile.value == null) {
-                      return const CircleAvatar(
-                        radius: 36,
-                        child: Icon(Icons.person),
-                      );
-                    }
-
-                    final avatar = controller.profile.value!.avatar;
-
-                    // 🚫 BLOCK fake/default avatar
-                    final bool hasValidAvatar =
-                        avatar.isNotEmpty && avatar != "avatar.png";
-
-                    return CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Color(0xFF0f3460),
-                      child: hasValidAvatar
-                          ? ClipOval(
-                              child: Image.network(
-                                "https://dev.srisaraswathigroups.in/uploads/$avatar",
-                                width: 72,
-                                height: 72,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return const Icon(Icons.person, size: 40);
-                                },
+                  // 1. Purple Header
+                  Container(
+                    height: 60,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF7E49FF),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.person_outline,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              "profile",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
-                            )
-                          : const Icon(Icons.person, size: 40),
-                    );
-                  }),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Obx(() {
-                      if (controller.isLoading.value ||
-                          controller.profile.value == null) {
-                        return const SizedBox(); // ✅ SAFE PLACEHOLDER
-                      }
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 100),
 
-                      final p = controller.profile.value!; // ✅ NOW SAFE
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  // 2. Profile Card (Overlapping)
+                  Positioned(
+                    top: 100,
+                    left: 20,
+                    right: 20,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(20, 55, 20, 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F2FF),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
                         children: [
                           Text(
                             p.name,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black,
+                            style: const TextStyle(
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
-                          _headerText("Email: ${p.email}", isDark),
-                          _headerText("Phone Number: ${p.mobile}", isDark),
-                          _headerText("User ID: ${p.userLogin}", isDark),
+                          const SizedBox(height: 12),
+                          _infoText("Email :", p.email),
+                          _infoText("Phone Number :", p.mobile),
+                          _infoText("User ID :", p.userLogin),
                         ],
-                      );
-                    }),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
 
-            Container(
-              height: 1,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF1a1a2e).withOpacity(0.25),
-                    const Color(0xFF0f3460).withOpacity(0.35),
-                    const Color(0xFF533483).withOpacity(0.25),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
-
-            Container(
-              decoration: BoxDecoration(
-                gradient: isDark
-                    ? const LinearGradient(
-                        colors: [
-                          Color(0xFF1a1a2e),
-                          Color(0xFF16213e),
-                          Color(0xFF0f3460),
-                          Color(0xFF533483),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : null,
-                color: isDark ? null : Colors.white,
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                  // 3. Circular Avatar (Overlapping Card)
+                  Positioned(
+                    top: 45,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                         ),
-                      ],
-              ),
-              child: TabBar(
-                isScrollable: true,
-
-                // ✅ ACTIVE TAB
-                labelColor: isDark ? Colors.white : const Color(0xFF0f3460),
-                labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-
-                // ✅ INACTIVE TAB
-                unselectedLabelColor:
-                    isDark ? Colors.white70 : const Color(0xFF64748B),
-
-                // ✅ INDICATOR (CLEAN, MATCHING)
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                    width: 3,
-                    color: isDark ? Colors.white : const Color(0xFF533483),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
+                          child: ClipOval(
+                            child:
+                                p.avatar.isNotEmpty && p.avatar != "avatar.png"
+                                ? Image.network(
+                                    "https://dev.srisaraswathigroups.in/uploads/${p.avatar}",
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.person,
+                                              size: 60,
+                                              color: Colors.grey,
+                                            ),
+                                  )
+                                : const Icon(
+                                    Icons.person,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  insets: const EdgeInsets.symmetric(horizontal: 16),
+                ],
+              ),
+
+              // Spacer to handle the overlap
+              const SizedBox(height: 170),
+
+              // 4. Action List
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(color: Colors.grey.shade100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _actionItem(
+                        "Profile",
+                        () => setState(() => selectedTabIndex = 0),
+                      ),
+                      const Divider(height: 1, indent: 20, endIndent: 20),
+                      _actionItem(
+                        "Attendance",
+                        () => setState(() => selectedTabIndex = 1),
+                      ),
+                      const Divider(height: 1, indent: 20, endIndent: 20),
+                      _actionItem(
+                        "Pay Scale",
+                        () => setState(() => selectedTabIndex = 2),
+                      ),
+                      const Divider(height: 1, indent: 20, endIndent: 20),
+                      _actionItem(
+                        "Leaves",
+                        () => setState(() => selectedTabIndex = 3),
+                      ),
+                      const Divider(height: 1, indent: 20, endIndent: 20),
+                      _actionItem(
+                        "Change Password",
+                        () => setState(() => selectedTabIndex = 4),
+                      ),
+                      const Divider(height: 1, indent: 20, endIndent: 20),
+                      _actionItem(
+                        "TFA",
+                        () => setState(() => selectedTabIndex = 5),
+                      ),
+                    ],
+                  ),
                 ),
-
-                // ❌ REMOVE DEFAULT DIVIDER (CAUSE OF MISMATCH)
-                dividerColor: Colors.transparent,
-
-                tabs: const [
-                  Tab(text: "Profile"),
-                  Tab(text: "Attendance"),
-                  Tab(text: "Pay Scale"),
-                  Tab(text: "Leaves"),
-                  Tab(text: "Change Password"),
-                  Tab(text: "TFA"),
-                ],
               ),
-            ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        );
+      }),
+      bottomNavigationBar: const StaffBottomNavBar(),
+    );
+  }
 
-            // ---------- TAB CONTENT ----------
-            Expanded(
-              child: TabBarView(
-                children: [
-                  ProfileTab(isDark: isDark),
-                  AttendanceTab(isDark: isDark),
-                  PayScaleTab(isDark: isDark),
-                  LeavesTab(isDark: isDark),
-                  ChangePasswordTab(isDark: isDark),
-                  TfaTab(isDark: isDark),
-                ],
-              ),
+  Widget _buildDetailView(int index, bool isDark) {
+    String title = "";
+    Widget content = const SizedBox();
+
+    switch (index) {
+      case 0:
+        title = "Profile";
+        content = ProfileTab(isDark: isDark);
+        break;
+      case 1:
+        title = "Attendance";
+        content = AttendanceTab(isDark: isDark);
+        break;
+      case 2:
+        title = "Pay Scale";
+        content = PayScaleTab(isDark: isDark);
+        break;
+      case 3:
+        title = "Leaves";
+        content = LeavesTab(isDark: isDark);
+        break;
+      case 4:
+        title = "Change Password";
+        content = ChangePasswordTab(isDark: isDark);
+        break;
+      case 5:
+        title = "TFA";
+        content = TfaTab(isDark: isDark);
+        break;
+    }
+
+    return Column(
+      children: [
+        Container(
+          height: 70,
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            color: Color(0xFF7E49FF),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
             ),
+          ),
+          child: SafeArea(
+            child: Row(
+              children: [
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  onPressed: () => setState(() => selectedTabIndex = null),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(child: content),
+      ],
+    );
+  }
+
+  Widget _infoText(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          children: [
+            TextSpan(
+              text: "$label ",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: value),
           ],
         ),
       ),
     );
   }
 
-  static Widget _headerText(String text, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: isDark
-              ? const Color(0xFFE5E7EB).withOpacity(0.85) // soft white
-              : const Color(0xFF475569), // slate for light
+  Widget _actionItem(String title, VoidCallback onTap) {
+    return ListTile(
+      onTap: onTap,
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF111827),
         ),
       ),
+      trailing: const Icon(Icons.chevron_right, color: Color(0xFF374151)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
     );
   }
 }
@@ -298,31 +382,38 @@ class ProfileTab extends StatelessWidget {
     final controller = Get.find<ProfileController>();
 
     return Obx(() {
-      // ✅ BLOCK UI UNTIL DATA EXISTS
       if (controller.isLoading.value || controller.profile.value == null) {
         return const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Color(0xFF7E49FF)),
         );
       }
 
-      // ✅ SAFE NOW
       final p = controller.profile.value!;
 
       return SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
             // ================= PERSONAL INFORMATION =================
             _sectionContainer(
               title: "Personal Information",
               children: [
-                _infoCard("Name", p.name),
-                _infoCard("Father's Name", p.father),
-                _infoCard("Gender", p.gender),
-                _infoCard("Date of Birth", p.dob),
-                _infoCard("Nationality", p.nationality),
-                _infoCard("Marital Status", p.marital),
-                _infoCard("Religion", p.religion),
-                _infoCard("Community", p.community),
+                _infoCard("Name", p.name, Icons.person),
+                _infoCard("Father's Name", p.father, Icons.badge_outlined),
+                _infoCard("Gender", p.gender, Icons.wc_outlined),
+                _infoCard("D.O.T", p.dob, Icons.calendar_month_outlined),
+                _infoCard(
+                  "Nationality",
+                  p.nationality,
+                  Icons.language_outlined,
+                ),
+                _infoCard(
+                  "Marital Status",
+                  p.marital,
+                  Icons.favorite_border_outlined,
+                ),
+                _infoCard("Religion", p.religion, Icons.handshake_outlined),
+                _infoCard("Community", p.community, Icons.groups_outlined),
               ],
             ),
 
@@ -330,10 +421,14 @@ class ProfileTab extends StatelessWidget {
             _sectionContainer(
               title: "Contact Information",
               children: [
-                _infoCard("Phone", p.mobile),
-                _infoCard("Email", p.email),
-                _infoCard("Current Address", p.cAddress),
-                _infoCard("Permanent Address", p.pAddress),
+                _infoCard("Phone", p.mobile, Icons.phone_android_outlined),
+                _infoCard("Email", p.email, Icons.email_outlined),
+                _infoCard("Current Address", p.cAddress, Icons.send_outlined),
+                _infoCard(
+                  "Permanent Address",
+                  p.pAddress,
+                  Icons.location_on_outlined,
+                ),
               ],
             ),
 
@@ -341,72 +436,18 @@ class ProfileTab extends StatelessWidget {
             _sectionContainer(
               title: "Professional Information",
               children: [
-                _infoCard("Designation", p.designation),
-                _infoCard("Job Type", p.jobType),
-                _infoCard("Department", p.department),
-                _infoCard("Experience", "N/A"),
-                _infoCard("Specialization", "N/A"),
-                _infoCard("Date of Joining", p.doj),
-                _infoCard("Branch", "N/A"),
-                _infoCard("Shift", p.shift),
-              ],
-            ),
-
-            // ================= EDUCATION =================
-            _sectionContainer(
-              title: "Education",
-              children: [
-                _infoCard("Qualification", "N/A"),
-                _infoCard("Passing Year", "N/A"),
-                _infoCard("College", "N/A"),
-                _infoCard("Percentage", "N/A"),
-              ],
-            ),
-
-            // ================= EXPERIENCE =================
-            _sectionContainer(
-              title: "Experience",
-              children: [
-                _infoCard("Experience", "N/A"),
-                _infoCard("Last Company", "N/A"),
-                _infoCard("Duration", "N/A"),
-              ],
-            ),
-
-            // ================= IDENTIFICATION =================
-            _sectionContainer(
-              title: "Identification",
-              children: [
-                _infoCard("PAN", p.pan),
-                _infoCard("Aadhar", p.aadhar),
-                _infoCard("Passport", "N/A"),
-                _infoCard("Driving License", "N/A"),
-                _infoCard("PF Number", "N/A"),
-                _infoCard("ESI Number", "N/A"),
-              ],
-            ),
-
-            // ================= BANK DETAILS =================
-            _sectionContainer(
-              title: "Bank Details",
-              children: [
-                _infoCard("Account Number", p.bankAcc),
-                _infoCard("Bank Name", p.bank),
-                _infoCard("IFSC Code", p.ifsc),
-                _infoCard("MICR Code", "N/A"),
-                _infoCard("Bank Branch", "N/A"),
-              ],
-            ),
-
-            // ================= OTHER DETAILS =================
-            _sectionContainer(
-              title: "Other Details",
-              children: [
-                _infoCard("Academic Year", "N/A"),
-                _infoCard("Remarks", "N/A"),
-                _infoCard("Status", "Active"),
-                _infoCard("Role", "Principal"),
-                _infoCard("Employee ID", "666700"),
+                _infoCard(
+                  "Designation",
+                  p.designation,
+                  Icons.assignment_ind_outlined,
+                ),
+                _infoCard("Job Type", p.jobType, Icons.work_outline),
+                _infoCard(
+                  "Department",
+                  p.department,
+                  Icons.account_tree_outlined,
+                ),
+                _infoCard("Experience", "N/A", Icons.history_outlined),
               ],
             ),
           ],
@@ -420,85 +461,66 @@ class ProfileTab extends StatelessWidget {
     required String title,
     required List<Widget> children,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: isDark ? ProfilePage.darkHeaderGradient : null,
-        color: isDark ? null : Colors.transparent,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _sectionTitle(title),
-          GridView.count(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 15),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEBEEFF),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2, // ✅ 2 cards per row
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.35, // ✅ Pay Scale look
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.25,
             children: children,
           ),
-        ],
-      ),
-    );
-  }
-
-  // ================= SECTION TITLE =================
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: isDark ? Colors.white : Colors.black,
         ),
-      ),
+      ],
     );
   }
 
   // ================= INFO CARD =================
-  Widget _infoCard(String label, String value) {
+  Widget _infoCard(String label, String value, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: isDark ? ProfilePage.cardGradient : null,
-        color: isDark ? null : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white70 : Colors.grey[600],
-            ),
-          ),
+          Icon(icon, color: const Color(0xFF7E49FF), size: 24),
           const SizedBox(height: 8),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+          const SizedBox(height: 2),
           Text(
             value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 15,
+            style: const TextStyle(
+              fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
+              color: Colors.black,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -521,16 +543,32 @@ class PayScaleTab extends StatelessWidget {
         color: isDark ? null : Colors.transparent,
       ),
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
           _sectionTitle("Pay Scale"),
-          _grid([
-            _infoCard("Branch", "N/A"),
-            _infoCard("Salary Head", "N/A"),
-            _infoCard("Amount", "N/A"),
-            _infoCard("Created At", "N/A"),
-            _infoCard("Updated At", "N/A"),
-          ]),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF16213e) : const Color(0xFFEBEEFF),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.1,
+              children: [
+                _infoCard(Icons.account_tree, "Branch", "N/A"),
+                _infoCard(Icons.account_balance_wallet, "Salary Head", "N/A"),
+                _infoCard(Icons.monetization_on, "Amount", "N/A"),
+                _infoCard(Icons.create_new_folder, "Created At", "N/A"),
+                _infoCard(Icons.history, "Update At", "N/A"),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -538,47 +576,28 @@ class PayScaleTab extends StatelessWidget {
 
   // ---------------- SECTION TITLE ----------------
   Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: isDark ? Colors.white : Colors.black,
-        ),
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: isDark ? Colors.white : Colors.black,
       ),
-    );
-  }
-
-  // ---------------- GRID LAYOUT ----------------
-  Widget _grid(List<Widget> children) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: children.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.3,
-      ),
-      itemBuilder: (context, index) => children[index],
     );
   }
 
   // ---------------- INFO CARD ----------------
-  Widget _infoCard(String title, String value) {
+  Widget _infoCard(IconData icon, String title, String value) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: isDark ? ProfilePage.cardGradient : null,
         color: isDark ? null : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -588,22 +607,34 @@ class PayScaleTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: Color(0xFF7E49FF),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const Spacer(),
           Text(
             title,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white70 : Colors.grey[700],
+              fontSize: 12,
+              color: isDark ? Colors.white70 : Colors.grey[600],
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : Colors.black,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -625,78 +656,75 @@ class ChangePasswordTab extends StatelessWidget {
         gradient: isDark ? ProfilePage.darkHeaderGradient : null,
         color: isDark ? null : Colors.transparent,
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 520),
-            padding: const EdgeInsets.all(26),
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          // ===== TITLE =====
+          Text(
+            "Change Password",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // ===== FORM CONTAINER =====
+          Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: isDark ? ProfilePage.cardGradient : null,
-              color: isDark ? null : Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                if (!isDark)
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 14,
-                    offset: const Offset(0, 8),
-                  ),
-              ],
+              color: isDark ? const Color(0xFF16213e) : const Color(0xFFEBEEFF),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ===== TITLE =====
-                Text(
-                  "Change Password",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
                 // ===== CURRENT PASSWORD =====
                 _label("Current Password", isDark),
-                _field("Enter Current Password", isDark),
+                const SizedBox(height: 8),
+                _field("Enter current password", isDark),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // ===== NEW PASSWORD =====
                 _label("New Password", isDark),
-                _field("Enter New Password", isDark),
+                const SizedBox(height: 8),
+                _field("Enter new password", isDark),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // ===== CONFIRM PASSWORD =====
                 _label("Confirm Password", isDark),
-                _field("Re-Enter Password", isDark),
+                const SizedBox(height: 8),
+                _field("Re-enter password", isDark),
 
-                const SizedBox(height: 34),
+                const SizedBox(height: 24),
 
                 // ===== BUTTON =====
-                Align(
-                  alignment: Alignment.centerRight,
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8B5CF6), Color(0xFFC084FC)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C7CE6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 38,
-                        vertical: 16,
-                      ),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      elevation: 0,
                     ),
                     onPressed: () {},
                     child: const Text(
                       "Change Password",
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -706,22 +734,19 @@ class ChangePasswordTab extends StatelessWidget {
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   // ================= LABEL =================
   Widget _label(String text, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: isDark ? Colors.white70 : const Color(0xFF6B7280),
-        ),
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: isDark ? Colors.white : Colors.black,
       ),
     );
   }
@@ -732,35 +757,31 @@ class ChangePasswordTab extends StatelessWidget {
       obscureText: true,
       style: TextStyle(
         fontSize: 14,
-        color: isDark ? Colors.white : const Color(0xFF374151),
+        color: isDark ? Colors.white : Colors.black,
       ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-          fontSize: 14,
-          color: isDark ? Colors.white38 : const Color(0xFF9CA3AF),
+          fontSize: 13,
+          color: isDark ? Colors.white54 : Colors.grey[600],
         ),
         filled: true,
-        fillColor:
-            isDark ? Colors.white.withOpacity(0.10) : const Color(0xFFF3F4F6),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        fillColor: isDark ? Colors.white.withOpacity(0.1) : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark
-                ? Colors.white.withOpacity(0.15)
-                : const Color(0xFFE5E7EB),
-          ),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: isDark
-                ? Colors.white.withOpacity(0.35)
-                : const Color(0xFF7C7CE6),
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
         ),
       ),
     );
@@ -782,18 +803,33 @@ class LeavesTab extends StatelessWidget {
         color: isDark ? null : Colors.transparent,
       ),
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
           _sectionTitle("Leaves"),
-          const SizedBox(height: 8),
-          _grid([
-            _infoCard("Leave Type", "N/A"),
-            _infoCard("From Date", "N/A"),
-            _infoCard("To Date", "N/A"),
-            _infoCard("Days", "N/A"),
-            _infoCard("Reason", "N/A"),
-            _infoCard("Status", "N/A"),
-          ]),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF16213e) : const Color(0xFFEBEEFF),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.1,
+              children: [
+                _infoCard(Icons.logout, "Leave Type", "N/A"),
+                _infoCard(Icons.calendar_month, "From Date", "N/A"),
+                _infoCard(Icons.calendar_month, "To Date", "N/A"),
+                _infoCard(Icons.edit_calendar, "Days", "N/A"),
+                _infoCard(Icons.article, "Reason", "N/A"),
+                _infoCard(Icons.edit, "Status", "N/A"),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -804,41 +840,25 @@ class LeavesTab extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: FontWeight.bold,
         color: isDark ? Colors.white : Colors.black,
       ),
     );
   }
 
-  // ---------- GRID ----------
-  Widget _grid(List<Widget> children) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: children.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.3,
-      ),
-      itemBuilder: (context, index) => children[index],
-    );
-  }
-
   // ---------- CARD ----------
-  Widget _infoCard(String title, String value) {
+  Widget _infoCard(IconData icon, String title, String value) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: isDark ? ProfilePage.cardGradient : null,
         color: isDark ? null : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           if (!isDark)
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -848,22 +868,34 @@ class LeavesTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: Color(0xFF7E49FF),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
+          const Spacer(),
           Text(
             title,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white70 : Colors.grey[700],
+              fontSize: 12,
+              color: isDark ? Colors.white70 : Colors.grey[600],
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : Colors.black,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -944,8 +976,9 @@ class _TfaTabState extends State<TfaTab> {
                         value: isEnabled,
                         activeThumbColor: Colors.white,
                         activeTrackColor: const Color(0xFF7C7CE6),
-                        inactiveThumbColor:
-                            widget.isDark ? Colors.white70 : null,
+                        inactiveThumbColor: widget.isDark
+                            ? Colors.white70
+                            : null,
                         onChanged: (value) {
                           setState(() => isEnabled = value);
                           _showResultDialog(value);
@@ -996,9 +1029,7 @@ class _TfaTabState extends State<TfaTab> {
       context: context,
       barrierDismissible: false,
       builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         child: Padding(
           padding: const EdgeInsets.all(28),
           child: Column(
@@ -1011,21 +1042,14 @@ class _TfaTabState extends State<TfaTab> {
                   shape: BoxShape.circle,
                   color: Colors.green.withOpacity(0.15),
                 ),
-                child: const Icon(
-                  Icons.check,
-                  size: 46,
-                  color: Colors.green,
-                ),
+                child: const Icon(Icons.check, size: 46, color: Colors.green),
               ),
 
               const SizedBox(height: 18),
 
               const Text(
                 "Good job!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 10),
@@ -1073,162 +1097,202 @@ class AttendanceTab extends StatelessWidget {
   final bool isDark;
   const AttendanceTab({super.key, required this.isDark});
 
-  static const double cellHeight = 46;
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: isDark ? ProfilePage.darkHeaderGradient : null,
-        color: isDark ? null : Colors.transparent,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Staff Attendance (2026)",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 15),
+
+          // 1. Stats Dashboard
+          Row(
+            children: [
+              _statCard(
+                "Working Days",
+                "26",
+                const Color(0xFF2ECC71),
+                Icons.calendar_month,
+              ),
+              const SizedBox(width: 10),
+              _statCard(
+                "Present Days",
+                "22",
+                const Color(0xFFF39C12),
+                Icons.check,
+              ),
+              const SizedBox(width: 10),
+              _statCard(
+                "Absent Days",
+                "4",
+                const Color(0xFFF06292),
+                Icons.close,
+              ),
+            ],
+          ),
+          const SizedBox(height: 25),
+
+          // 2. Calendar Container
+          Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F2FF),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Column(
+              children: [
+                // Month Selector
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          "January 2026",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.chevron_left, color: Colors.grey[800]),
+                        const SizedBox(width: 15),
+                        Icon(Icons.chevron_right, color: Colors.grey[800]),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Days Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ["S", "M", "T", "W", "T", "F", "S"]
+                      .map(
+                        (day) => Text(
+                          day,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 10),
+
+                // Calendar Grid
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 7,
+                        ),
+                    itemCount: 35, // 5 weeks
+                    itemBuilder: (context, index) {
+                      int day =
+                          index -
+                          1; // Aligning with Jan 1st being Thursday (roughly matching image)
+                      // This is a mockup alignment
+                      if (index < 3)
+                        return _calendarCell(
+                          "",
+                          status: null,
+                          isInactive: true,
+                        );
+                      if (day > 31)
+                        return _calendarCell(
+                          "${day - 31}",
+                          status: null,
+                          isInactive: true,
+                        );
+
+                      // Mock status based on image (Approximate)
+                      String? status = "present";
+                      if (day == 6 || day == 13 || day == 20 || day == 27)
+                        status = "holiday";
+                      if (day == 12 || day == 15 || day == 23 || day == 26)
+                        status = "absent";
+
+                      return _calendarCell("$day", status: status);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 15),
+
+                // Legend
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _legendItem("Present", const Color(0xFF2ECC71)),
+                    const SizedBox(width: 15),
+                    _legendItem("Absent", const Color(0xFFF06292)),
+                    const SizedBox(width: 15),
+                    _legendItem("Holiday", const Color(0xFF5D6D7E)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 100), // Space for bottom nav
+        ],
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    );
+  }
+
+  Widget _statCard(String label, String value, Color color, IconData icon) {
+    return Expanded(
+      child: Container(
+        height: 100,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _title("Staff Attendance (2026)"),
-            const SizedBox(height: 16),
-            _attendanceTable(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ================= TABLE =================
-  Widget _attendanceTable() {
-    return Column(
-      children: [
-        _headerRow(),
-        ...List.generate(31, (i) => _dayRow(i + 1)),
-        const SizedBox(height: 16),
-        _summaryRow(),
-      ],
-    );
-  }
-
-  // ================= HEADER ROW =================
-  Widget _headerRow() {
-    return Row(
-      children: [
-        _headerCell("Day"),
-        _headerCell("Jan 2026"),
-      ],
-    );
-  }
-
-  // ================= DAY ROW =================
-  Widget _dayRow(int day) {
-    return Row(
-      children: [
-        _dataCell("Day $day", isLabel: true),
-        _dataCell("N/A"),
-      ],
-    );
-  }
-
-  // ================= SUMMARY =================
-  Widget _summaryRow() {
-    return Row(
-      children: [
-        _summaryCard("WD", "0"),
-        const SizedBox(width: 10),
-        _summaryCard("PD", "0"),
-        const SizedBox(width: 10),
-        _summaryCard("AD", "0"),
-      ],
-    );
-  }
-
-  // ================= HEADER CELL =================
-  Widget _headerCell(String text) {
-    return Expanded(
-      child: Container(
-        height: cellHeight,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: isDark ? ProfilePage.cardGradient : null,
-          color: isDark ? null : Colors.white,
-          border: Border.all(
-            color:
-                isDark ? Colors.white.withOpacity(0.2) : Colors.grey.shade300,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF1F2937),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================= DATA CELL =================
-  Widget _dataCell(String text, {bool isLabel = false}) {
-    return Expanded(
-      child: Container(
-        height: cellHeight,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: isDark ? ProfilePage.cardGradient : null,
-          color: isDark ? null : Colors.white,
-          border: Border.all(
-            color:
-                isDark ? Colors.white.withOpacity(0.15) : Colors.grey.shade300,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isLabel ? FontWeight.w600 : FontWeight.w500,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================= SUMMARY CARD (FIXED) =================
-  Widget _summaryCard(String title, String value) {
-    return Expanded(
-      child: Container(
-        height: 60,
-        decoration: BoxDecoration(
-          gradient: isDark ? ProfilePage.cardGradient : null,
-          color: isDark ? null : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isDark ? null : Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-          ],
-        ),
-        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(height: 8),
             Text(
-              title,
-              style: TextStyle(
-                fontSize: 13,
-                color: isDark ? Colors.white70 : Colors.grey[600],
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+                color: Colors.white,
               ),
             ),
           ],
@@ -1237,15 +1301,68 @@ class AttendanceTab extends StatelessWidget {
     );
   }
 
-  // ================= TITLE =================
-  Widget _title(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: isDark ? Colors.white : Colors.black,
+  Widget _calendarCell(
+    String text, {
+    required String? status,
+    bool isInactive = false,
+  }) {
+    Color? dotColor;
+    if (status == "present") dotColor = const Color(0xFF2ECC71);
+    if (status == "absent") dotColor = const Color(0xFFF06292);
+    if (status == "holiday") dotColor = const Color(0xFF5D6D7E);
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade100, width: 0.5),
       ),
+      child: Stack(
+        children: [
+          Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isInactive ? Colors.grey[300] : Colors.black,
+              ),
+            ),
+          ),
+          if (dotColor != null)
+            Positioned(
+              top: 5,
+              right: 5,
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: dotColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _legendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -8,6 +8,7 @@ class VerifyOutingPage extends StatefulWidget {
   final String? time;
   final String? status;
   final String? type;
+  final String? imageUrl;
 
   const VerifyOutingPage({
     super.key,
@@ -16,6 +17,7 @@ class VerifyOutingPage extends StatefulWidget {
     this.time,
     this.status,
     this.type,
+    this.imageUrl,
   });
 
   @override
@@ -28,114 +30,98 @@ class _VerifyOutingPageState extends State<VerifyOutingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final darkGradient = const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF1a1a2e),
-        Color(0xFF16213e),
-        Color(0xFF0f3460),
-        Color(0xFF533483),
-      ],
-    );
-
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        height: MediaQuery.of(context).size.height, // ✅ full height
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: darkGradient,
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAppTitle(context, isDark),
-                const SizedBox(height: 28),
-
-                /// ADMISSION NUMBER
-                Center(
-                  child: Text(
-                    widget.adm ?? "",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F3FF),
+                  borderRadius: BorderRadius.circular(30),
                 ),
-
-                const SizedBox(height: 30),
-
-                /// MAIN CARD
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildRow("Student Name", widget.name ?? "-"),
-                      _buildRow("Type", widget.type ?? "-"),
-                      _buildRow("Time", widget.time ?? "-"),
-
-                      const SizedBox(height: 20),
-
-                      /// IMAGE PREVIEW
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: _capturedImage != null
-                            ? Image.file(
-                                _capturedImage!,
-                                height: 220,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.asset(
-                                "assets/girl.jpg",
-                                height: 220,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // AVATAR & ID
+                        Column(
+                          children: [
+                            Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 4,
+                                ),
+                                image: DecorationImage(
+                                  image: _capturedImage != null
+                                      ? FileImage(_capturedImage!)
+                                      : (widget.imageUrl != null &&
+                                            widget.imageUrl!.isNotEmpty)
+                                      ? NetworkImage(widget.imageUrl!)
+                                      : const AssetImage("assets/boy.jpg")
+                                            as ImageProvider,
+                                  fit: BoxFit.cover,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
                               ),
-                      ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              widget.adm ?? "251238",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 20),
 
-                      const SizedBox(height: 20),
+                        // DETAILS
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildDetailLabel("Student Name :"),
+                              _buildDetailValue(
+                                widget.name ?? "Gujjula Ganesh Reddy",
+                              ),
+                              const SizedBox(height: 12),
+                              _buildDetailLabel("Type :"),
+                              _buildDetailValue(widget.type ?? "Hospital"),
+                              const SizedBox(height: 12),
+                              _buildDetailLabel("Time :"),
+                              _buildDetailValue(widget.time ?? "10:30"),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 25),
 
-                      _buildTakePhotoButton(context),
-                    ],
-                  ),
+                    // ACTION BUTTONS
+                    _buildGradientButton(context),
+                    const SizedBox(height: 15),
+                    _buildApproveButton(context),
+                  ],
                 ),
-
-                const SizedBox(height: 60), // ✅ instead of Spacer
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ================= APP TITLE =================
-  Widget _buildAppTitle(BuildContext context, bool isDark) {
-    return InkWell(
-      onTap: () => Navigator.pop(context),
-      child: Row(
-        children: const [
-          Icon(Icons.arrow_back, color: Colors.white),
-          SizedBox(width: 8),
-          Text(
-            "Verify Outing",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              ),
             ),
           ),
         ],
@@ -143,22 +129,52 @@ class _VerifyOutingPageState extends State<VerifyOutingPage> {
     );
   }
 
-  Widget _buildRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+  // ================= HEADER =================
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 10,
+        bottom: 30,
+        left: 20,
+        right: 20,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
       child: Row(
         children: [
-          Text(
-            "$title : ",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 22,
+              ),
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.white70),
+          const SizedBox(width: 20),
+          const Text(
+            "Verify Outing",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
         ],
@@ -166,22 +182,46 @@ class _VerifyOutingPageState extends State<VerifyOutingPage> {
     );
   }
 
-  // ================= TAKE PHOTO BUTTON =================
-  Widget _buildTakePhotoButton(BuildContext context) {
-    return InkWell(
+  // ================= DETAIL UTILS =================
+  Widget _buildDetailLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildDetailValue(String value) {
+    return Text(
+      value,
+      style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+    );
+  }
+
+  // ================= ACTION BUTTONS =================
+  Widget _buildGradientButton(BuildContext context) {
+    return GestureDetector(
       onTap: () => _showCaptureDialog(context),
-      borderRadius: BorderRadius.circular(14),
       child: Container(
         width: double.infinity,
-        height: 54,
+        height: 50,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
           gradient: const LinearGradient(
-            colors: [
-              Color(0xFF5A8DEE),
-              Color(0xFF6A5AE0),
-            ],
+            colors: [Color(0xFF8B5CF6), Color(0xFFC084FC)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8B5CF6).withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: const Center(
           child: Text(
@@ -189,7 +229,7 @@ class _VerifyOutingPageState extends State<VerifyOutingPage> {
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -197,110 +237,118 @@ class _VerifyOutingPageState extends State<VerifyOutingPage> {
     );
   }
 
-  // ================= DIALOG =================
-  void _showCaptureDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.6),
-      builder: (_) => Dialog(
-        backgroundColor: const Color(0xFF2C2F3A),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+  Widget _buildApproveButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // Handle approve logic
+      },
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF10B981), Color(0xFF34D399)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF10B981).withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Capture Student Photo",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 28),
-              Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                alignment: WrapAlignment.center,
-                children: [
-                  _dialogButton(
-                    label: "Capture Photo",
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF43E97B), Color(0xFF38F9D7)],
-                    ),
-                    onTap: () async {
-                      await _captureFromCamera();
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _dialogButton(
-                    label: "Upload Photo",
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF5A8DEE), Color(0xFF6A5AE0)],
-                    ),
-                    onTap: () async {
-                      await _pickFromGallery();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ],
+        child: const Center(
+          child: Text(
+            "Approve",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
     );
   }
 
-  // ================= CAMERA =================
-  Future<void> _captureFromCamera() async {
-    final XFile? photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
+  // ================= PHOTO LOGIC =================
+  void _showCaptureDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Capture Student Photo",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _dialogButton(
+                  icon: Icons.camera_alt,
+                  label: "Camera",
+                  onTap: () {
+                    _captureFromCamera();
+                    Navigator.pop(context);
+                  },
+                ),
+                _dialogButton(
+                  icon: Icons.photo_library,
+                  label: "Gallery",
+                  onTap: () {
+                    _pickFromGallery();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
-    if (photo != null) {
-      setState(() => _capturedImage = File(photo.path));
-    }
-  }
-
-  Future<void> _pickFromGallery() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-    if (image != null) {
-      setState(() => _capturedImage = File(image.path));
-    }
   }
 
   Widget _dialogButton({
+    required IconData icon,
     required String label,
-    required LinearGradient gradient,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(30),
-      child: Container(
-        width: 170,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF8B5CF6).withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, color: const Color(0xFF8B5CF6), size: 30),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
       ),
     );
+  }
+
+  Future<void> _captureFromCamera() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    if (photo != null) setState(() => _capturedImage = File(photo.path));
+  }
+
+  Future<void> _pickFromGallery() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) setState(() => _capturedImage = File(image.path));
   }
 }

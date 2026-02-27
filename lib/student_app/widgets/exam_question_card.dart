@@ -71,9 +71,18 @@ class ExamQuestionCard extends StatelessWidget {
               spacing: 4,
               children: [
                 _buildTag("Single Choice", Colors.blue),
-                _buildTag("medium", Colors.orange),
-                _buildTag("+ 5 Marks", Colors.green),
-                _buildTag("- 2 Negative", Colors.red),
+                _buildTag(
+                  question['difficulty']?.toString().toLowerCase() ?? "medium",
+                  Colors.orange,
+                ),
+                _buildTag(
+                  "+ ${question['correct_marks'] ?? '0'} Marks",
+                  Colors.green,
+                ),
+                _buildTag(
+                  "- ${question['negative_marks'] ?? '0'} Negative",
+                  Colors.red,
+                ),
               ],
             ),
           ],
@@ -100,9 +109,9 @@ class ExamQuestionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withAlpha(127)),
       ),
       child: Text(
         label,

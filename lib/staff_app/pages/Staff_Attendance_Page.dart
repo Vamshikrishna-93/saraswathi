@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:student_app/staff_app/widgets/search_field.dart';
+import 'package:get/get.dart';
 
 class StaffAttendancePage extends StatefulWidget {
   const StaffAttendancePage({super.key});
@@ -9,316 +9,450 @@ class StaffAttendancePage extends StatefulWidget {
 }
 
 class _StaffAttendancePageState extends State<StaffAttendancePage> {
-  // ================= COLORS =================
-  static const Color dark1 = Color(0xFF1a1a2e);
-  static const Color dark2 = Color(0xFF16213e);
-  static const Color dark3 = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-  static const Color neon = Color(0xFF00FFF5);
+  // ================= UI Constants =================
+  static const Color primaryPurple = Color(0xFF7E49FF);
+  static const Color lavenderBg = Color(0xFFF1F4FF);
 
   String query = "";
+  String selectedMonth = "Nov - 25";
 
   // SAMPLE DATA
-  final List<Map<String, dynamic>> attendance = [
+  final List<Map<String, dynamic>> attendanceData = [
     {
       "id": "666980",
-      "name": "A ANJANEYULU",
-      "days": ["A", "A", "A", "A", "A", "A", "A"],
+      "name": "A.ANJANNEYULU",
+      "initial": "B",
+      "presentCount": 18,
+      "absentCount": 5,
+      "days": ["P", "A", "P", "P", "P", "P", "P"],
     },
     {
-      "id": "667290",
-      "name": "A ARUN KUMAR",
-      "days": ["A", "A", "A", "A", "A", "A", "A"],
+      "id": "666980",
+      "name": "A.ANJANNEYULU",
+      "initial": "B",
+      "presentCount": 18,
+      "absentCount": 5,
+      "days": ["P", "A", "P", "P", "P", "P", "P"],
     },
     {
-      "id": "666865",
-      "name": "A BALARAM",
-      "days": ["A", "A", "A", "A", "A", "A", "A"],
-    },
-    {
-      "id": "666870",
-      "name": "A G SANKAR REDDY",
-      "days": ["A", "A", "A", "A", "A", "A", "A"],
+      "id": "666980",
+      "name": "A.ANJANNEYULU",
+      "initial": "B",
+      "presentCount": 18,
+      "absentCount": 5,
+      "days": ["P", "A", "P", "P", "P", "P", "P"],
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final filtered = attendance.where((s) {
+    final filtered = attendanceData.where((s) {
       return s["name"]!.toLowerCase().contains(query.toLowerCase()) ||
           s["id"]!.contains(query);
     }).toList();
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-
-      // ================= APP BAR =================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Staff Attendance",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-
-      // ================= BODY =================
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // BACKGROUND
-          Container(
-            decoration: BoxDecoration(
-              gradient: isDark
-                  ? const LinearGradient(
-                      colors: [dark1, dark2, dark3, purpleDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Theme.of(context).scaffoldBackgroundColor,
-                        Theme.of(context).colorScheme.surface,
-                      ],
-                    ),
-            ),
-          ),
-
           Column(
             children: [
-              const SizedBox(height: 95),
-
-              // ================= SEARCH =================
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color:
-                        isDark ? Colors.white.withOpacity(0.12) : Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white24
-                          : Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  child: SearchField(
-                    hint: "Search by name / user ID",
-                    hintStyle: TextStyle(
-                      color: isDark ? const Color(0xFFB5C7E8) : Colors.black54,
-                    ),
-                    textColor: isDark ? Colors.white : Colors.black,
-                    iconColor: isDark ? neon : Colors.black54,
-                    onChanged: (v) => setState(() => query = v),
+              // ================= CUSTOM HEADER =================
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 10,
+                  bottom: 25,
+                  left: 20,
+                  right: 20,
+                ),
+                decoration: const BoxDecoration(
+                  color: primaryPurple,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(35),
+                    bottomRight: Radius.circular(35),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // ================= TITLE =================
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Staff Month Wise - November 2025",
-                  style: TextStyle(
-                    color: isDark ? neon : Theme.of(context).primaryColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // ================= LIST =================
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final staff = filtered[index];
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: isDark
-                            ? LinearGradient(
-                                colors: [
-                                  dark3.withOpacity(0.55),
-                                  purpleDark.withOpacity(0.55),
-                                ],
-                              )
-                            : LinearGradient(
-                                colors: [
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.08),
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .secondary
-                                      .withOpacity(0.08),
-                                ],
-                              ),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: isDark
-                              ? neon.withOpacity(0.35)
-                              : Theme.of(context).dividerColor,
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                isDark ? neon.withOpacity(0.2) : Colors.black12,
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    const SizedBox(width: 20),
+                    const Text(
+                      "Staff Attendance",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ================= TITLE & MONTH SELECTOR =================
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Staff Month Wise",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7C69FF).withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
                         children: [
                           Text(
-                            staff["name"],
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black,
-                              fontSize: 17,
+                            selectedMonth,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "User ID: ${staff["id"]}",
-                            style: TextStyle(
-                              color: isDark
-                                  ? const Color(0xFFB5C7E8)
-                                  : Colors.black54,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // DAYS
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                for (int i = 0; i < staff["days"].length; i++)
-                                  Container(
-                                    margin: const EdgeInsets.only(right: 10),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 14,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.redAccent,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "${i + 1}",
-                                          style: TextStyle(
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          staff["days"][i],
-                                          style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white,
+                            size: 18,
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 90),
+              // ================= MAIN CONTENT =================
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(16, 5, 16, 0),
+                  padding: const EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                    color: lavenderBg.withOpacity(0.7),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: primaryPurple.withOpacity(0.4),
+                            ),
+                          ),
+                          child: TextField(
+                            onChanged: (v) => setState(() => query = v),
+                            decoration: const InputDecoration(
+                              icon: Icon(
+                                Icons.search,
+                                color: Colors.black54,
+                                size: 20,
+                              ),
+                              hintText: "Search Staff name / ID",
+                              hintStyle: TextStyle(
+                                color: Colors.black38,
+                                fontSize: 13,
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Staff List
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: filtered.length,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          itemBuilder: (context, index) {
+                            return _buildStaffAttendanceCard(filtered[index]);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 80), // Space for bottom buttons
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
 
-          // ================= BOTTOM BUTTONS =================
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        "Staff Biometric Logs",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+          // ================= BOTTOM ACTIONS =================
+          Positioned(
+            bottom: 20,
+            left: 15,
+            right: 15,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildGradientButton(
+                    "Staff Biometric Logs",
+                    [
+                      const Color(0xFF7C69FF).withOpacity(0.7),
+                      const Color(0xFFD38DFA).withOpacity(0.8),
+                    ],
+                    () => Get.toNamed('/staffBiometricLogs'),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        "Take Staff Attendance",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildGradientButton(
+                    "Take Staff Attendance",
+                    [const Color(0xFF4DB6AC), const Color(0xFF9CCC65)],
+                    () => Get.toNamed('/takeStaffAttendance'),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStaffAttendanceCard(Map<String, dynamic> staff) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: const Color(0xFFB59CFF),
+                radius: 25,
+                child: Text(
+                  staff['initial'],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    staff['name'],
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "ID:${staff['id']}",
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            "Attendance Overview:",
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(staff['days'].length, (i) {
+                final status = staff['days'][i];
+                final isPresent = status == "P";
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.black.withOpacity(0.05)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "${i + 1}",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: isPresent
+                              ? const Color(0xFF66BB6A).withOpacity(0.6)
+                              : const Color(0xFFEF5350).withOpacity(0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          status,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              _buildSummaryItem(
+                const Color(0xFF4DB6AC),
+                "Present:",
+                staff['presentCount'],
+              ),
+              const SizedBox(width: 15),
+              _buildSummaryItem(
+                const Color(0xFFEF5350),
+                "Absent:",
+                staff['absentCount'],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(Color color, String label, int count) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.6),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.black54,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          "$count",
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGradientButton(
+    String label,
+    List<Color> colors,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: colors[0].withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
       ),
     );
   }

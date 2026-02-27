@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,24 +56,32 @@ class ExamsService {
         throw Exception('User not logged in.');
       }
 
-      final response = await http.get(
-        Uri.parse('${ApiConfig.studentApiBaseUrl}$_writeExamEndpoint/$examId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
+      // Pattern from Postman: .../api/student/exam/write/{exam_id}
+      final url = '${ApiConfig.studentApiBaseUrl}$_writeExamEndpoint/$examId';
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         return decoded is Map<String, dynamic> ? decoded : {'data': decoded};
       } else {
         throw Exception(
-          'Failed to load exam questions: ${response.statusCode}',
+          'Failed to load exam questions: ${response.statusCode} (URL: $url)',
         );
       }
     } catch (e) {
+      if (e is TimeoutException) {
+        throw Exception('Request timed out. Please check your connection.');
+      }
       throw Exception('Error fetching exam questions: $e');
     }
   }

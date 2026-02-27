@@ -25,16 +25,33 @@ class OutingModel {
 
   factory OutingModel.fromJson(Map<String, dynamic> json) {
     return OutingModel(
-      id: json['id'],
-      admno: json['admno'] ?? '',
-      studentName: json['student_name'] ?? '',
-      outingType: json['outingtype'] ?? '',
-      outDate: json['out_date'] ?? '',
-      outingTime: json['outing_time'] ?? '',
-      purpose: json['purpose'] ?? '',
-      status: json['status'] ?? '',
-      permission: json['permission'] ?? '',
-      branch: json['branch'] ?? '',
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      admno: json['admno']?.toString() ?? '',
+      studentName:
+          (json['student_name'] ?? json['sname'] ?? json['studentname'] ?? '')
+              .toString(),
+      outingType:
+          (json['passtype'] ??
+                  json['pass_type'] ??
+                  json['outingtype'] ??
+                  json['outing_type'] ??
+                  '')
+              .toString(),
+      outDate: (json['outing_date'] ?? json['out_date'] ?? json['date'] ?? '')
+          .toString(),
+      outingTime:
+          (json['outtime'] ??
+                  json['out_time'] ??
+                  json['outing_time'] ??
+                  json['time'] ??
+                  '')
+              .toString(),
+      purpose: (json['purpose'] ?? '').toString(),
+      status: (json['status'] ?? '').toString(),
+      permission: (json['permission'] ?? '').toString(),
+      branch: (json['branch'] ?? '').toString(),
     );
   }
 }
