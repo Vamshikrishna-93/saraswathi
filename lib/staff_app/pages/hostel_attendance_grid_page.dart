@@ -24,12 +24,6 @@ class HostelAttendanceGridPage extends StatefulWidget {
 class _HostelAttendanceGridPageState extends State<HostelAttendanceGridPage> {
   final HostelController hostelCtrl = Get.find<HostelController>();
 
-  // COLORS
-  static const Color darkNavy = Color(0xFF1a1a2e);
-  static const Color darkBlue = Color(0xFF16213e);
-  static const Color midBlue = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
-
   @override
   void initState() {
     super.initState();
@@ -41,71 +35,120 @@ class _HostelAttendanceGridPageState extends State<HostelAttendanceGridPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF16213e),
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Attendance Grid",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+      backgroundColor: Colors.white,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 25),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Attendance Grid",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "${widget.studentName} (${widget.admNo})",
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              "${widget.studentName} (${widget.admNo})",
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Obx(() {
+              if (hostelCtrl.isLoading.value) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: SkeletonList(itemCount: 3),
+                );
+              }
+
+              if (hostelCtrl.hostelGrid.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No attendance data found",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 5,
+                ),
+                itemCount: hostelCtrl.hostelGrid.length,
+                itemBuilder: (context, index) {
+                  final monthData = hostelCtrl.hostelGrid[index];
+                  return _MonthGridCard(monthData: monthData);
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final topPad = MediaQuery.of(context).padding.top;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: topPad + 12,
+        bottom: 28,
+        left: 20,
+        right: 20,
+      ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF7C3AED), // Same as mark page
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
       ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [darkNavy, darkBlue, midBlue, purpleDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Obx(() {
-            if (hostelCtrl.isLoading.value) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: SkeletonList(itemCount: 5),
-              );
-            }
-
-            if (hostelCtrl.hostelGrid.isEmpty) {
-              return const Center(
-                child: Text(
-                  "No attendance data found",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: hostelCtrl.hostelGrid.length,
-              itemBuilder: (context, index) {
-                final monthData = hostelCtrl.hostelGrid[index];
-                return _MonthGridCard(monthData: monthData);
-              },
-            );
-          }),
-        ),
+          const SizedBox(width: 14),
+          const Text(
+            "Attendance Grid",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -120,58 +163,40 @@ class _MonthGridCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: const Color(0xFFF3F0FF),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Month Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00FFF5).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFF00FFF5).withOpacity(0.5),
-                  ),
-                ),
-                child: Text(
-                  monthData.monthName?.toUpperCase() ?? "UNKNOWN",
-                  style: const TextStyle(
-                    color: Color(0xFF00FFF5),
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
+          // Month/Year Chip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDCD6FD),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              monthData.monthName?.toUpperCase() ?? "UNKNOWN",
+              style: const TextStyle(
+                color: Color(0xFF7C3AED),
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
           // Days Grid
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7, // 7 days a week style
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisCount: 7,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
               childAspectRatio: 1,
             ),
             itemCount: 31,
@@ -180,7 +205,7 @@ class _MonthGridCard extends StatelessWidget {
               final key = "Day_${dayNum.toString().padLeft(2, '0')}";
               final status = monthData.dayAttendance[key];
 
-              return _DayCell(day: dayNum, status: status);
+              return _DayGridCell(day: dayNum, status: status);
             },
           ),
         ],
@@ -189,75 +214,37 @@ class _MonthGridCard extends StatelessWidget {
   }
 }
 
-class _DayCell extends StatelessWidget {
+class _DayGridCell extends StatelessWidget {
   final int day;
   final String? status;
 
-  const _DayCell({required this.day, required this.status});
-
-  Color _getStatusColor(String? s) {
-    switch (s?.toUpperCase()) {
-      case 'P':
-        return Colors.greenAccent;
-      case 'A':
-        return Colors.redAccent;
-      case 'O':
-        return Colors.orangeAccent;
-      case 'H':
-        return Colors.purpleAccent;
-      case 'SO':
-        return Colors.cyanAccent;
-      case 'SH':
-        return Colors.yellowAccent;
-      default:
-        return Colors.white.withOpacity(0.05); // Default/Null
-    }
-  }
+  const _DayGridCell({required this.day, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final color = _getStatusColor(status);
-    final hasStatus = status != null && status != 'null' && status!.isNotEmpty;
-
+    // Determine color based on status if needed
+    // For now matching the visual of white boxes
     return Container(
       decoration: BoxDecoration(
-        color: hasStatus ? color : Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: hasStatus
-            ? null
-            : Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Stack(
-        children: [
-          // Day Number
-          Center(
-            child: Text(
-              "$day",
-              style: TextStyle(
-                color: hasStatus ? Colors.black87 : Colors.white30,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
-          // Status Indicator (small dot or text?)
-          // Since the box is colored, maybe just the number is fine.
-          // Or show the status code instead of day number if present?
-          // Let's overlay status code small if present.
-          if (hasStatus)
-            Positioned(
-              bottom: 2,
-              right: 2,
-              child: Text(
-                status!,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
         ],
+      ),
+      child: Center(
+        child: Text(
+          "$day",
+          style: const TextStyle(
+            color: Color(0xFF2D3748),
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
       ),
     );
   }

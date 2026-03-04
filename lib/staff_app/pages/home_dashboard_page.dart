@@ -5,6 +5,8 @@ import '../controllers/main_controller.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/staff_bottom_nav_bar.dart';
 import 'package:student_app/staff_app/pages/profile_page.dart';
+import '../api/api_service.dart';
+import './student_details_page.dart';
 
 class HomeDashboardPage extends StatefulWidget {
   const HomeDashboardPage({super.key});
@@ -17,6 +19,11 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   late ProfileController profileCtrl;
   String selectedYear = "2025-2026";
 
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+  bool _isSearchingInAppBar = false;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +31,40 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
         ? Get.find<ProfileController>()
         : Get.put(ProfileController(), permanent: true);
     Get.put(StaffMainController(), permanent: true).changeIndex(0);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSearch() async {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _searchResults = [];
+    });
+
+    try {
+      final results = await ApiService.searchStudentByAdmNo(query);
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isSearching = false;
+        _searchResults = [];
+      });
+    }
   }
 
   final List<String> years = [
@@ -74,6 +115,50 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   // ================= APP BAR =================
 
   AppBar _buildAppBar(BuildContext context) {
+    if (_isSearchingInAppBar) {
+      return AppBar(
+        backgroundColor: const Color(0xFF8B5CF6),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              _isSearchingInAppBar = false;
+              _searchController.clear();
+              _searchResults = [];
+            });
+          },
+        ),
+        title: TextField(
+          controller: _searchController,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(color: Colors.white, fontSize: 18),
+          decoration: const InputDecoration(
+            hintText: "Search Admission No...",
+            hintStyle: TextStyle(color: Colors.white70),
+            border: InputBorder.none,
+          ),
+          onSubmitted: (_) => _handleSearch(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                _searchResults = [];
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: _handleSearch,
+          ),
+        ],
+      );
+    }
+
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -96,7 +181,11 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: Colors.white),
-          onPressed: () {},
+          onPressed: () {
+            setState(() {
+              _isSearchingInAppBar = true;
+            });
+          },
         ),
         Stack(
           children: [
@@ -122,7 +211,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
           ],
         ),
         PopupMenuButton<String>(
-          offset: const Offset(0, 50),
+          position: PopupMenuPosition.under,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -264,6 +353,97 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 25),
+
+            if (_isSearching)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              ),
+
+            if (_searchResults.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: Text(
+                      "Found ${_searchResults.length} students",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _searchResults.length > 5
+                        ? 5
+                        : _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final student = _searchResults[index];
+                      final adm =
+                          (student['admno'] ?? student['adm_no'])?.toString() ??
+                          '';
+                      final name =
+                          (student['student_name'] ?? student['name'])
+                              ?.toString() ??
+                          '';
+                      final branch = student['branch_name']?.toString() ?? '';
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            Get.to(() => StudentDetailsPage(admissionNo: adm));
+                          },
+                          leading: CircleAvatar(
+                            backgroundColor: const Color(0xFF7C3AED),
+                            child: Text(
+                              name.isNotEmpty ? name[0].toUpperCase() : 'S',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          title: Text(
+                            name.toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF7C3AED),
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Adm: $adm | $branch",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             const SizedBox(height: 25),
 
             GridView.count(

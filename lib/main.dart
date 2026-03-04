@@ -12,6 +12,7 @@ import 'package:student_app/staff_app/controllers/theme_controller.dart'
     as staff;
 import 'package:student_app/staff_app/controllers/auth_controller.dart';
 import 'package:student_app/staff_app/controllers/main_controller.dart';
+import 'package:student_app/staff_app/controllers/hostel_controller.dart';
 import 'package:student_app/theme_controllers.dart';
 
 // Staff Theme
@@ -45,6 +46,7 @@ import 'package:student_app/staff_app/pages/add_staff_page.dart';
 import 'package:student_app/staff_app/pages/staff_biometric_logs_page.dart';
 import 'package:student_app/staff_app/pages/take_staff_attendance_page.dart';
 import 'package:student_app/staff_app/pages/pro_admission_page.dart';
+import 'package:student_app/staff_app/pages/hostel_attendance_mark_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +58,8 @@ void main() async {
   // 🌗 Global controller (NOT user-specific) - Staff App
   Get.put(staff.ThemeController(), permanent: true);
 
-  // 🔐 AuthController - Staff App
+  // 🔐 AuthControllers & Others - Staff App
+  Get.put(HostelController(), permanent: true);
   Get.lazyPut<AuthController>(() => AuthController());
   Get.put(StaffMainController(), permanent: true);
 
@@ -166,6 +169,10 @@ class SsJcApp extends StatelessWidget {
         GetPage(name: '/nonHostel', page: () => const NonHostelPage()),
         GetPage(name: '/chat', page: () => const ChatPage()),
         GetPage(name: '/communication', page: () => const CommunicationPage()),
+        GetPage(
+          name: '/hostelAttendanceMark',
+          page: () => const HostelAttendanceMarkPage(),
+        ),
         GetPage(name: '/proAdmission', page: () => const ProAdmissionPage()),
       ],
     );

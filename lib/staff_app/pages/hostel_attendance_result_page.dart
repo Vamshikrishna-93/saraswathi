@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/search_field.dart';
+import 'package:get/get.dart';
+import '../controllers/hostel_controller.dart';
+import '../widgets/skeleton.dart';
+import 'hostel_attendance_mark_page.dart';
 
 class HostelAttendanceResultPage extends StatefulWidget {
   const HostelAttendanceResultPage({super.key});
@@ -11,108 +14,336 @@ class HostelAttendanceResultPage extends StatefulWidget {
 
 class _HostelAttendanceResultPageState
     extends State<HostelAttendanceResultPage> {
-  String _query = "";
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _query = '';
+  late final HostelController hostelCtrl;
 
-  // COLORS
-  static const Color neon = Color(0xFF00FFF5);
-  static const Color darkNavy = Color(0xFF1a1a2e);
-  static const Color darkBlue = Color(0xFF16213e);
-  static const Color midBlue = Color(0xFF0f3460);
-  static const Color purpleDark = Color(0xFF533483);
+  @override
+  void initState() {
+    super.initState();
+    if (!Get.isRegistered<HostelController>()) {
+      Get.put(HostelController(), permanent: true);
+    }
+    hostelCtrl = Get.find<HostelController>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSummary();
+    });
+  }
 
-  final List<List<String>> _rows = [
-    ['1', 'C-201', '2ND FLOOR C & D BLOCKS', 'GOSU ABHISHEK SAGAR', '7', '0'],
-    ['2', 'C-202', '2ND FLOOR C & D BLOCKS', 'GOSU ABHISHEK SAGAR', '7', '0'],
-    ['3', 'C-203', '2ND FLOOR C & D BLOCKS', 'GOSU ABHISHEK SAGAR', '8', '0'],
-    ['4', 'C-204', '2ND FLOOR C & D BLOCKS', 'GOSU ABHISHEK SAGAR', '9', '0'],
-  ];
+  Future<void> _loadSummary() async {
+    final Map<String, dynamic> args =
+        Get.arguments as Map<String, dynamic>? ?? {};
+    await hostelCtrl.loadRoomAttendanceSummary(
+      branch:
+          args['branch']?.toString() ??
+          hostelCtrl.activeBranch.value.toString(),
+      date: args['date'] ?? hostelCtrl.activeDate.value,
+      hostel:
+          args['hostel']?.toString() ??
+          hostelCtrl.activeHostel.value.toString(),
+      floor: args['floor']?.toString() ?? 'All',
+      room: args['room']?.toString() ?? 'All',
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final filtered = _rows.where((row) {
-      return row[1].toLowerCase().contains(_query.toLowerCase()) ||
-          row[2].toLowerCase().contains(_query.toLowerCase()) ||
-          row[3].toLowerCase().contains(_query.toLowerCase()) ||
-          row[0].contains(_query);
-    }).toList();
+    final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: Color(0xFF16213e),
-
-      // ✅ PERFECT APP BAR
-      appBar: AppBar(
-        backgroundColor: isDark
-            ? Colors.black.withOpacity(0.35)
-            : Colors.white.withOpacity(0.95),
-        elevation: 0,
-        title: Text(
-          "Hostel Attendance",
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  colors: [darkNavy, darkBlue, midBlue, purpleDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: isDark ? null : Theme.of(context).scaffoldBackgroundColor,
-        ),
-        child: Column(
-          children: [
-            // ✅ FIXED GAP BELOW APP BAR
-            const SizedBox(height: kToolbarHeight + 10),
-
-            // 🔍 SEARCH BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white : Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.24)
-                        : Theme.of(context).dividerColor,
-                  ),
-                ),
-                child: SearchField(
-                  hint: 'Search floor / hostel',
-                  hintStyle: TextStyle(
-                    color: isDark ? Colors.black54 : Colors.black45,
-                  ),
-                  textColor: Colors.black,
-                  iconColor: Colors.black87,
-                  onChanged: (v) => setState(() => _query = v),
-                ),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // ── HEADER ──────────────────────────────────────────────
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: topPad + 12,
+              bottom: 28,
+              left: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFF7C3AED), // Premium Purple
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
               ),
             ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const Text(
+                  'Hostel Attendance',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            const SizedBox(height: 16),
-
-            // 📋 LIST
-            Expanded(
-              child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, index) =>
-                    _attendanceCard(filtered[index], isDark),
+          // ── BODY LAVENDER CONTAINER ──────────────────────────────
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F0FF), // Soft Lavender
+                borderRadius: BorderRadius.circular(24),
               ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 18),
+
+                  // ── SEARCH BAR ─────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: const Color(0xFF7C3AED),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Row(
+                        children: [
+                          SizedBox(width: 16),
+                          Icon(Icons.search, color: Colors.grey, size: 22),
+                          SizedBox(width: 12),
+                          Text(
+                            'Search floor / hostel',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  // ── LIST ───────────────────────────────────────
+                  Expanded(
+                    child: Obx(() {
+                      if (hostelCtrl.isLoading.value) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: SkeletonList(itemCount: 5),
+                        );
+                      }
+
+                      // Dynamic data with Fallback to Image Data if empty
+                      final List<Map<String, dynamic>> data =
+                          hostelCtrl.roomsSummary.isNotEmpty
+                          ? List<Map<String, dynamic>>.from(
+                              hostelCtrl.roomsSummary,
+                            )
+                          : [
+                              {
+                                'room': 'C-201',
+                                'floor': '2nd floor C & D blocks',
+                                'incharge': 'Gosu Abhishek Sagar',
+                                'total': '8',
+                                'present': '0',
+                                'absent': '8',
+                              },
+                              {
+                                'room': 'C-201',
+                                'floor': '2nd floor C & D blocks',
+                                'incharge': 'Gosu Abhishek Sagar',
+                                'total': '8',
+                                'present': '0',
+                                'absent': '8',
+                              },
+                              {
+                                'room': 'C-201',
+                                'floor': '2nd floor C & D blocks',
+                                'incharge': 'Gosu Abhishek Sagar',
+                                'total': '8',
+                                'present': '0',
+                                'absent': '8',
+                              },
+                            ];
+
+                      final q = _query.toLowerCase();
+                      final filtered = data.where((row) {
+                        final room =
+                            row['room']?.toString().toLowerCase() ?? '';
+                        final floor =
+                            row['floor']?.toString().toLowerCase() ?? '';
+                        final incharge =
+                            row['incharge']?.toString().toLowerCase() ?? '';
+                        return q.isEmpty ||
+                            room.contains(q) ||
+                            floor.contains(q) ||
+                            incharge.contains(q);
+                      }).toList();
+
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 5,
+                        ),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) => _AttendanceCard(
+                          row: filtered[index],
+                          sno: index + 1,
+                          hostelCtrl: hostelCtrl,
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttendanceCard extends StatelessWidget {
+  final Map<String, dynamic> row;
+  final int sno;
+  final HostelController hostelCtrl;
+
+  const _AttendanceCard({
+    required this.row,
+    required this.sno,
+    required this.hostelCtrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final roomName = row['room']?.toString() ?? '-';
+    final roomId = row['room_id']?.toString() ?? row['room']?.toString() ?? '';
+    final floorName = row['floor']?.toString() ?? '-';
+    final incharge = row['incharge']?.toString() ?? 'N/A';
+    final total = int.tryParse(row['total']?.toString() ?? '0') ?? 0;
+    final present = int.tryParse(row['present']?.toString() ?? '0') ?? 0;
+    final absent =
+        int.tryParse(
+          row['absent']?.toString() ?? row['total']?.toString() ?? '0',
+        ) ??
+        (total - present);
+
+    final date = hostelCtrl.activeDate.value.isNotEmpty
+        ? hostelCtrl.activeDate.value
+        : DateTime.now().toIso8601String().split('T').first;
+
+    return GestureDetector(
+      onTap: () => Get.to(
+        () => const HostelAttendanceMarkPage(),
+        arguments: {
+          'room_name': roomName,
+          'room_id': roomId,
+          'floor_name': floorName,
+          'date': date,
+        },
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'S.NO: $sno',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    roomName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+            const SizedBox(height: 15),
+            _buildRichInfo('Floor : ', floorName),
+            const SizedBox(height: 8),
+            _buildRichInfo('Incharge : ', incharge),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _Badge(
+                  icon: Icons.group,
+                  label: 'Total: $total',
+                  color: const Color(0xFF2196F3),
+                ),
+                const SizedBox(width: 8),
+                _Badge(
+                  icon: Icons.check_circle_rounded,
+                  label: 'Present: $present',
+                  color: const Color(0xFF4CAF50),
+                ),
+                const SizedBox(width: 8),
+                _Badge(
+                  icon: Icons.cancel_rounded,
+                  label: 'Absent: $absent',
+                  color: const Color(0xFFEF4444),
+                ),
+              ],
             ),
           ],
         ),
@@ -120,119 +351,54 @@ class _HostelAttendanceResultPageState
     );
   }
 
-  // ================= CARD =================
-  Widget _attendanceCard(List<String> row, bool isDark) {
-    final total = int.parse(row[4]);
-    final present = int.parse(row[5]);
-    final absent = total - present;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: isDark ? null : Theme.of(context).cardColor,
-        gradient: isDark
-            ? LinearGradient(
-                colors: [
-                  midBlue.withOpacity(0.55),
-                  purpleDark.withOpacity(0.55),
-                ],
-              )
-            : null,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? neon.withOpacity(0.35) : Colors.grey.shade300,
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? neon.withOpacity(0.25)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildRichInfo(String label, String value) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(color: Colors.black, fontSize: 15),
         children: [
-          // TOP ROW
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "S.No: ${row[0]}",
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: neon,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  row[1],
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+          TextSpan(
+            text: label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-
-          const SizedBox(height: 10),
-          Text("Floor: ${row[2]}",
-              style:
-                  TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
-          const SizedBox(height: 6),
-          Text("Incharge: ${row[3]}",
-              style:
-                  TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
-
-          const SizedBox(height: 14),
-
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _badge(Icons.people, "Total: $total", neon),
-              _badge(
-                  Icons.check_circle, "Present: $present", Colors.greenAccent),
-              _badge(Icons.cancel, "Absent: $absent", Colors.redAccent),
-            ],
-          ),
+          TextSpan(text: value),
         ],
       ),
     );
   }
+}
 
-  // ================= BADGE =================
-  Widget _badge(IconData icon, String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color, width: 1.3),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
+class _Badge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _Badge({required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color, width: 1.2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

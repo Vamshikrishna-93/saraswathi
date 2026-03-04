@@ -16,7 +16,7 @@ class HostelListPage extends StatefulWidget {
 }
 
 class _HostelListPageState extends State<HostelListPage> {
-  final HostelController hostelCtrl = Get.put(HostelController());
+  late final HostelController hostelCtrl;
   final BranchController branchCtrl = Get.put(BranchController());
   final StaffController staffCtrl = Get.put(StaffController());
 
@@ -28,6 +28,10 @@ class _HostelListPageState extends State<HostelListPage> {
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<HostelController>()) {
+      Get.put(HostelController(), permanent: true);
+    }
+    hostelCtrl = Get.find<HostelController>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       staffCtrl.fetchStaff();
       if (branchCtrl.branches.isEmpty) {

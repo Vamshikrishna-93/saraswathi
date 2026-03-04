@@ -11,6 +11,7 @@ import 'package:student_app/student_app/student_app_bar.dart';
 import 'package:student_app/student_app/full_day_timetable.dart';
 import 'package:student_app/student_app/upcoming_exams_page.dart';
 import 'package:student_app/student_app/student_calendar.dart';
+import 'package:student_app/student_app/services/exams_service.dart';
 import 'package:student_app/student_app/widgets/dashboard_widgets.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   bool _isLoading = true;
   Map<String, dynamic> _attendanceData = {};
+  Map<String, dynamic> _examStats = {};
 
   // Graph Data
   List<Map<String, dynamic>> _chartData = [];
@@ -60,12 +62,17 @@ class _DashboardPageState extends State<DashboardPage> {
         AttendanceService.getAttendance(forceRefresh: forceRefresh),
         RemarksService.getRemarks(forceRefresh: forceRefresh),
         HostelAttendanceService.getHostelAttendance(forceRefresh: forceRefresh),
+        ExamsService.getExamStats().catchError((e) {
+          debugPrint("Error fetching exam stats: $e");
+          return <String, dynamic>{};
+        }),
       ]);
 
       final summary = results[0] as Map<String, dynamic>;
       final grid = results[1] as ClassAttendance;
       final remarks = results[2] as List<dynamic>;
       final hostelGrid = results[3] as HostelAttendance;
+      final examStats = results[4] as Map<String, dynamic>;
 
       if (mounted) {
         // Sort remarks by date descending (newest first)
@@ -82,6 +89,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
         setState(() {
           _attendanceData = summary;
+          _examStats = examStats;
           _processChartData(grid);
           _remarks = sortedRemarks;
           _processHostelChartData(hostelGrid);
@@ -298,7 +306,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 boxShadow: [
                   BoxShadow(
                     color: Theme.of(context).brightness == Brightness.dark
+                        // ignore: deprecated_member_use
                         ? Colors.black.withOpacity(0.3)
+                        // ignore: deprecated_member_use
                         : Colors.black.withOpacity(0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
@@ -421,45 +431,41 @@ class _DashboardPageState extends State<DashboardPage> {
                           iconColor: Colors.blue,
                           title: "Total Exam Questions",
                           value:
-                              _attendanceData['total_exam_questions']
+                              _examStats['summary']?['total_questions']
                                   ?.toString() ??
-                              "200",
+                              "-",
                         ),
                         AttendanceTile(
                           icon: Icons.check_circle,
                           iconColor: Colors.green,
                           title: "Total Attempted Questions",
                           value:
-                              _attendanceData['total_attempted_questions']
-                                  ?.toString() ??
-                              "150",
+                              _examStats['summary']?['attempted']?.toString() ??
+                              "-",
                         ),
                         AttendanceTile(
                           icon: Icons.close,
                           iconColor: Colors.amber,
                           title: "Total Not Attempted",
                           value:
-                              _attendanceData['total_not_attempted']
-                                  ?.toString() ??
-                              "50",
+                              _examStats['summary']?['skipped']?.toString() ??
+                              "-",
                         ),
                         AttendanceTile(
                           icon: Icons.add_circle,
                           iconColor: Colors.cyan,
-                          title: "Total +ve Questions",
+                          title: "Total Correct Questions",
                           value:
-                              _attendanceData['total_positive_questions']
-                                  ?.toString() ??
-                              "120",
+                              _examStats['summary']?['correct']?.toString() ??
+                              "-",
                         ),
                         AttendanceTile(
                           icon: Icons.remove_circle,
                           iconColor: Colors.red,
-                          title: "Total -ve Questions",
+                          title: "Total Wrong Questions",
                           value:
-                              _attendanceData['total_negative_questions']
-                                  ?.toString() ??
-                              "30",
+                              _examStats['summary']?['wrong']?.toString() ??
+                              "-",
                           isLast: true,
                         ),
                       ],
